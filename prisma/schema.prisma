@@ -1,0 +1,242 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum SheetStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+  UNKNOWN
+}
+
+enum SyncStatus {
+  RUNNING
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+model Profile {
+  id        String   @id // Supabase Auth User UUID
+  email     String   @unique
+  name      String
+  avatarUrl String?
+  rollNumber String? @unique
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  platformAccount  PlatformAccount?
+  solvedProblems   SolvedProblem[]
+  snapshots        PlatformSnapshot[]
+  syncLogs         SyncLog[]
+  sheetsCreated    Sheet[]
+  questionsCreated Question[]
+  achievements     UserAchievement[]
+  manualProgress   ManualProgress[]
+
+  @@index([role])
+  @@index([rollNumber])
+  @@map("profiles")
+}
+
+/// A student's connected LeetCode account (one per profile).
+model PlatformAccount {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  user                 Profile            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  username             String
+  normalizedUsername   String             @unique
+  verificationStatus   VerificationStatus @default(PENDING)
+  lastSyncedAt         DateTime?
+  lastSuccessfulSyncAt DateTime?
+  lastError            String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@index([verificationStatus])
+  @@map("platform_accounts")
+}
+
+/// Latest cached LeetCode stats per profile.
+model PlatformSnapshot {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  totalSolved  Int      @default(0)
+  easySolved   Int      @default(0)
+  mediumSolved Int      @default(0)
+  hardSolved   Int      @default(0)
+  rating       Int?
+  rank         String?
+  rawMetadata  Json?
+  fetchedAt    DateTime @default(now())
+
+  @@map("platform_snapshots")
+}
+
+/// Canonical per-problem solve record, matched against sheet questions by
+/// externalKey (e.g. "leetcode:two-sum"). Sheet ticks are derived from these.
+model SolvedProblem {
+  id                 String     @id @default(cuid())
+  userId             String
+  user               Profile    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  externalKey        String
+  title              String?
+  difficulty         Difficulty @default(UNKNOWN)
+  solvedAt           DateTime?
+  sourceSubmissionId String?
+  source             String?
+  firstSeenAt        DateTime   @default(now())
+  lastSeenAt         DateTime   @default(now())
+
+  @@unique([userId, externalKey])
+  @@index([userId])
+  @@index([externalKey])
+}
+
+model SyncLog {
+  id               String     @id @default(cuid())
+  userId           String
+  user             Profile    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status           SyncStatus
+  startedAt        DateTime   @default(now())
+  completedAt      DateTime?
+  recordsProcessed Int        @default(0)
+  errorMessage     String?
+
+  @@index([userId])
+  @@index([status])
+  @@map("sync_logs")
+}
+
+model Sheet {
+  id           String      @id @default(cuid())
+  name         String
+  slug         String      @unique
+  description  String?
+  status       SheetStatus @default(DRAFT)
+  easyPoints   Int         @default(1)
+  mediumPoints Int         @default(4)
+  hardPoints   Int         @default(8)
+  createdById  String?
+  creator     Profile?       @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  sheetQuestions SheetQuestion[]
+
+  @@index([status])
+  @@map("sheets")
+}
+
+model Question {
+  id          String     @id @default(cuid())
+  externalKey String     @unique
+  title       String
+  url         String
+  difficulty  Difficulty @default(UNKNOWN)
+  topic       String
+  tags        String[]   @default([])
+  metadata    Json?
+  createdById String?
+  creator     Profile?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  sheetQuestions SheetQuestion[]
+  manualProgress ManualProgress[]
+
+  @@index([topic])
+  @@index([difficulty])
+  @@map("questions")
+}
+
+model SheetQuestion {
+  id         String   @id @default(cuid())
+  sheetId    String
+  sheet      Sheet    @relation(fields: [sheetId], references: [id], onDelete: Cascade)
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  position   Int
+  createdAt  DateTime @default(now())
+
+  @@unique([sheetId, questionId])
+  @@index([sheetId, position])
+  @@map("sheet_questions")
+}
+
+/// User's manual solve tick for a sheet question. Overrides the auto-verified
+/// status: markedSolved=true forces a tick, false forces an untick, no row =
+/// fall back to the synced LeetCode SolvedProblem match.
+model ManualProgress {
+  id           String   @id @default(cuid())
+  userId       String
+  user         Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionId   String
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  markedSolved Boolean
+  markedAt     DateTime @default(now())
+
+  @@unique([userId, questionId])
+  @@index([questionId])
+  @@map("manual_progress")
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  title       String
+  description String
+  threshold   Int
+  icon        String?
+  metadata    Json?
+
+  userAchievements UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  user          Profile     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  unlockedAt    DateTime    @default(now())
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+/// Managed by scripts/fix-auth-trigger.ts (Supabase auth email-domain allowlist
+/// trigger). Kept in the schema so `prisma db push` never drops it.
+model AllowedEmailDomain {
+  domain    String   @id
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("allowed_email_domains")
+}

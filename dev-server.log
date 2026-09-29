@@ -1,0 +1,65 @@
+   ▲ Next.js 15.5.26
+   - Local:        http://localhost:3000
+   - Network:      http://172.16.0.2:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 2.6s
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 1202ms (174 modules)
+ ○ Compiling /sheets ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (113kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (268kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled /sheets in 5.9s (898 modules)
+ GET /sheets 200 in 16899ms
+ GET /sheets 200 in 7508ms
+ GET /sheets 200 in 7916ms
+ GET /sheets 200 in 7720ms
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+ ○ Compiling / ...
+ ✓ Compiled / in 873ms (900 modules)
+ ✓ Compiled in 786ms (338 modules)
+ GET / 200 in 1767ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 869ms (927 modules)
+ GET /dashboard 200 in 1949ms
+ GET /dashboard 200 in 3596ms
+ GET /sheets 200 in 9076ms
+ GET /sheets 200 in 8871ms
+ GET /sheets 200 in 253ms
+ ○ Compiling /auth/callback ...
+ ✓ Compiled /auth/callback in 590ms (935 modules)
+ GET /auth/callback?code=f1432b6f-a5c9-4700-96e8-a54afdae2e84 307 in 2372ms
+ GET /dashboard 200 in 6565ms
+ GET /sheets 200 in 12584ms
+ ○ Compiling /api/sheets/progress ...
+ ✓ Compiled /api/sheets/progress in 544ms (937 modules)
+ POST /api/sheets/progress 200 in 4631ms
+ POST /api/sheets/progress 200 in 3774ms
+ GET /sheets 200 in 12502ms
+ GET /sheets 200 in 11771ms
+ GET /sheets 200 in 12067ms
+ GET /sheets 200 in 13474ms
+ ○ Compiling /admin ...
+ ✓ Compiled /admin in 1790ms (987 modules)
+ GET /admin 200 in 8419ms
+ GET /admin 200 in 5993ms
+ ○ Compiling /sheets/[slug] ...
+ ✓ Compiled /sheets/[slug] in 699ms (989 modules)
+ GET /admin 200 in 6127ms
+ GET /sheets/kiit-dsa-150 200 in 7604ms
+ GET /sheets/k 200 in 20699ms
+ GET /admin 200 in 6409ms
+ GET /sheets/kiit-dsa-150 200 in 10625ms
+ ○ Compiling /api/admin/sheets/[id] ...
+ ✓ Compiled /api/admin/sheets/[id] in 1788ms (1092 modules)
+ DELETE /api/admin/sheets/cmulqdd8y0001kwngkr6jcayh 200 in 6037ms
+ GET /admin 200 in 7671ms
+ GET /admin 200 in 5869ms
+ ○ Compiling /profile ...
+ ✓ Compiled /profile in 1801ms (1025 modules)
+ GET /profile 200 in 4620ms
+ GET /profile 200 in 7553ms
+ GET /dashboard 200 in 8711ms
+[?25h

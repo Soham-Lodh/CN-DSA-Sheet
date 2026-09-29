@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Ninjas KIIT Chapter - DSA Tracker Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cnOrange: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c'
+                        },
+                        slateDark: {
+                            800: '#1e293b',
+                            850: '#172033',
+                            900: '#0f172a',
+                            950: '#080d1a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti for celebrations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card-hover {
+            transition: all 0.25s ease-in-out;
+        }
+        .glass-card-hover:hover {
+            border-color: rgba(249, 115, 22, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.1);
+        }
+        .gradient-orange-text {
+            background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #f97316;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slateDark-900 text-slate-100 custom-scrollbar">
+
+    <!-- Top Header / Brand Bar -->
+    <header class="sticky top-0 z-50 glass-card border-b border-slate-800 bg-slateDark-900/90 backdrop-blur-md px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cnOrange-600 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-cnOrange-600/30 font-extrabold text-xl">
+                    <i class="fa-solid font-mono fa-code"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold text-lg tracking-tight text-white">CODING NINJAS</span>
+                        <span class="text-xs bg-cnOrange-500/20 text-cnOrange-500 border border-cnOrange-500/30 px-2 py-0.5 rounded-full font-semibold">KIIT CHAPTER</span>
+                    </div>
+                    <p class="text-xs text-slate-400 font-medium">DSA Mastery Tracker Platform</p>
+                </div>
+            </div>
+
+            <!-- Global Action Controls & User Profile pill -->
+            <div class="flex items-center gap-4">
+                <button onclick="toggleTechnicalBlueprint()" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition">
+                    <i class="fa-solid fa-layer-group text-cnOrange-500"></i>
+                    <span>Architecture Code Docs</span>
+                </button>
+                <div class="flex items-center gap-3 bg-slateDark-800/80 px-3 py-1.5 rounded-full border border-slate-700">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-cnOrange-500">
+                        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-900"></span>
+                    </div>
+                    <div class="hidden md:block text-left pr-1">
+                        <div class="text-xs font-bold text-white flex items-center gap-1">
+                            <span>Aarav Sharma</span>
+                            <i class="fa-solid fa-circle-check text-blue-400 text-[10px]" title="Verified KIIT Student"></i>
+                        </div>
+                        <div class="text-[10px] text-slate-400">aarav.21cs@kiit.ac.in</div>
+                    </div>
+                    <button class="text-slate-400 hover:text-white text-xs pl-2 border-l border-slate-700" title="Logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Interactive Page Switcher Navigation -->
+    <div class="bg-slateDark-850 border-b border-slate-800 px-4 lg:px-8 py-2.5 sticky top-[61px] z-40">
+        <div class="max-w-7xl mx-auto flex items-center justify-between overflow-x-auto custom-scrollbar gap-2">
+            <div class="flex items-center space-x-1 sm:space-x-2 min-w-max">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition text-white bg-cnOrange-600 shadow-md shadow-cnOrange-600/20">
+                    <i class="fa-solid fa-chart-pie text-xs"></i>
+                    <span>Dashboard View</span>
+                </button>
+                <button onclick="switchTab('sheets')" id="nav-sheets" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-book-bookmark text-xs"></i>
+                    <span>DSA Sheets (75 & 150)</span>
+                </button>
+                <button onclick="switchTab('leaderboard')" id="nav-leaderboard" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-trophy text-xs"></i>
+                    <span>KIIT Leaderboard</span>
+                </button>
+                <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-user-ninja text-xs"></i>
+                    <span>Profile & Achievements</span>
+                </button>
+                <button onclick="switchTab('admin')" id="nav-admin" class="nav-btn flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-shield-halved text-xs"></i>
+                    <span>Admin Panel</span>
+                </button>
+            </div>
+            
+            <div class="hidden lg:flex items-center gap-2 text-xs text-slate-400 font-mono bg-slate-900/60 px-3 py-1.5 rounded-md border border-slate-800">
+                <i class="fa-solid fa-fire text-cnOrange-500 animate-pulse"></i>
+                <span>Daily Streak: <strong class="text-white">12 Days</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6">
+
+        <!-- 📊 VIEW 1: DASHBOARD -->
+        <section id="view-dashboard" class="space-y-6">
+            <!-- Welcome Header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl relative overflow-hidden border-l-4 border-l-cnOrange-500">
+                <div class="space-y-1">
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Welcome back, <span class="gradient-orange-text">Aarav!</span> 👋</h1>
+                    <p class="text-slate-400 text-sm">Keep up the momentum. You're in the top 5% of KIIT Chapter coders this week!</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="switchTab('sheets')" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cnOrange-500 to-amber-500 hover:from-cnOrange-600 hover:to-amber-600 text-white font-semibold text-sm shadow-lg shadow-cnOrange-500/25 transition flex items-center gap-2">
+                        <span>Continue Solving</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Top Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Total Solved -->
+                <div class="glass-card glass-card-hover p-5 rounded-xl flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Questions Solved</p>
+                        <h3 class="text-2xl font-black text-white mt-1" id="dash-solved-count">68 <span class="text-xs text-slate-500 font-normal">/ 225</span></h3>
+                        <p class="text-xs text-emerald-400 mt-1 flex items-center gap-1 font-medium">
+                            <i class="fa-solid fa-arrow-trend-up"></i> +5 this week
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-cnOrange-500/10 border border-cnOrange-500/20 text-cnOrange-500 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+
+                <!-- Remaining Questions -->
+                <div class="glass-card glass-card-hover p-5 rounded-xl flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Remaining Questions</p>
+                        <h3 class="text-2xl font-black text-white mt-1" id="dash-remaining-count">157</h3>
+                        <p class="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-clock text-amber-400"></i> ~14 days target
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                </div>
+
+                <!-- Overall Percentage -->
+                <div class="glass-card glass-card-hover p-5 rounded-xl flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Completion Rate</p>
+                        <h3 class="text-2xl font-black text-white mt-1" id="dash-percent">30.2%</h3>
+                        <p class="text-xs text-blue-400 mt-1 flex items-center gap-1 font-medium">
+                            <i class="fa-solid fa-bullseye"></i> Goal: 100% before placements
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                </div>
+
+                <!-- Current Streak -->
+                <div class="glass-card glass-card-hover p-5 rounded-xl flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Current Streak</p>
+                        <h3 class="text-2xl font-black text-white mt-1">12 Days</h3>
+                        <p class="text-xs text-cnOrange-400 mt-1 flex items-center gap-1 font-medium">
+                            <i class="fa-solid fa-fire text-cnOrange-500"></i> Personal Best: 18 days
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-cnOrange-500/20 border border-cnOrange-500/40 text-cnOrange-500 flex items-center justify-center text-xl animate-pulse">
+                        <i class="fa-solid fa-fire-flame-curved"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sheet Progress Breakdown Cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- CN KIIT 75 Progress Card -->
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-cnOrange-500/10 border border-cnOrange-500/30 flex items-center justify-center text-cnOrange-500 font-bold">75</div>
+                            <div>
+                                <h3 class="font-bold text-lg text-white">Coding Ninjas KIIT 75 Sheet</h3>
+                                <p class="text-xs text-slate-400">Curated high-frequency interview foundation problems</p>
+                            </div>
+                        </div>
+                        <span class="text-sm font-bold text-cnOrange-400" id="dash-75-text">48 / 75</span>
+                    </div>
+
+                    <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5 border border-slate-700">
+                        <div id="dash-75-bar" class="bg-gradient-to-r from-cnOrange-600 to-amber-500 h-2 rounded-full transition-all duration-500" style="width: 64%;"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+                        <span>Topics Covered: Arrays, DP, Binary Trees, Graphs</span>
+                        <span class="font-bold text-white" id="dash-75-pct">64% Done</span>
+                    </div>
+                </div>
+
+                <!-- CN KIIT 150 Progress Card -->
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">150</div>
+                            <div>
+                                <h3 class="font-bold text-lg text-white">Coding Ninjas KIIT 150 Sheet</h3>
+                                <p class="text-xs text-slate-400">Advanced interview preparation & competitive track</p>
+                            </div>
+                        </div>
+                        <span class="text-sm font-bold text-blue-400" id="dash-150-text">20 / 150</span>
+                    </div>
+
+                    <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5 border border-slate-700">
+                        <div id="dash-150-bar" class="bg-gradient-to-r from-blue-600 to-cyan-400 h-2 rounded-full transition-all duration-500" style="width: 13.3%;"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+                        <span>Topics Covered: Segment Trees, Trie, Advanced DP</span>
+                        <span class="font-bold text-white" id="dash-150-pct">13.3% Done</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Heatmap / Activity Grid & Recent Activity -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Activity Heatmap Simulation -->
+                <div class="glass-card p-6 rounded-2xl lg:col-span-2 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-bold text-base text-white flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-days text-cnOrange-500"></i>
+                            <span>Coding Activity Heatmap (Last 12 Weeks)</span>
+                        </h3>
+                        <span class="text-xs text-slate-400">Total Solved: 68</span>
+                    </div>
+
+                    <div class="p-3 bg-slateDark-900/80 rounded-xl border border-slate-800/80 overflow-x-auto">
+                        <div class="grid grid-flow-col grid-rows-7 gap-1.5 min-w-[500px]">
+                            <!-- Generating simulated GitHub-like squares -->
+                            <script>
+                                const levels = ['bg-slate-800', 'bg-cnOrange-900/60', 'bg-cnOrange-700', 'bg-cnOrange-500'];
+                                for(let i=0; i<84; i++){
+                                    let rand = Math.random();
+                                    let lvl = rand > 0.7 ? (rand > 0.9 ? 3 : 2) : (rand > 0.4 ? 1 : 0);
+                                    document.write(`<div class="w-3.5 h-3.5 rounded-sm ${levels[lvl]} transition-colors hover:scale-125 cursor-pointer" title="Day ${i+1}: ${lvl*2} submissions"></div>`);
+                                }
+                            </script>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+                        <span>Less</span>
+                        <div class="flex items-center gap-1">
+                            <div class="w-3 h-3 rounded-sm bg-slate-800"></div>
+                            <div class="w-3 h-3 rounded-sm bg-cnOrange-900/60"></div>
+                            <div class="w-3 h-3 rounded-sm bg-cnOrange-700"></div>
+                            <div class="w-3 h-3 rounded-sm bg-cnOrange-500"></div>
+                        </div>
+                        <span>More</span>
+                    </div>
+                </div>
+
+                <!-- Recent Submissions Feed -->
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <h3 class="font-bold text-base text-white flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-cnOrange-500"></i>
+                        <span>Recent Solved Activity</span>
+                    </h3>
+
+                    <div class="space-y-3" id="recent-activity-list">
+                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-800/50 border border-slate-800">
+                            <div>
+                                <p class="text-xs font-bold text-white">3 Sum</p>
+                                <span class="text-[10px] text-amber-400 font-medium">Medium • Arrays</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-mono">Today, 2:15 PM</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-800/50 border border-slate-800">
+                            <div>
+                                <p class="text-xs font-bold text-white">Binary Tree Level Order Traversal</p>
+                                <span class="text-[10px] text-amber-400 font-medium">Medium • Trees</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-mono">Yesterday</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-800/50 border border-slate-800">
+                            <div>
+                                <p class="text-xs font-bold text-white">Two Sum</p>
+                                <span class="text-[10px] text-emerald-400 font-medium">Easy • Arrays</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-mono">2 days ago</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-800/50 border border-slate-800">
+                            <div>
+                                <p class="text-xs font-bold text-white">Trapping Rain Water</p>
+                                <span class="text-[10px] text-rose-400 font-medium">Hard • Dynamic Programming</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-mono">3 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 📚 VIEW 2: DSA SHEETS VIEW -->
+        <section id="view-sheets" class="space-y-6 hidden">
+            <!-- Sheet Header Switcher -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-5 rounded-2xl">
+                <div>
+                    <h2 class="text-xl font-bold text-white">DSA Curated Sheets</h2>
+                    <p class="text-xs text-slate-400">Select a sheet, apply topic filters, solve on LeetCode, and mark your completion.</p>
+                </div>
+
+                <!-- 75 vs 150 Toggle -->
+                <div class="flex items-center bg-slateDark-900 p-1 rounded-xl border border-slate-800">
+                    <button onclick="selectSheet(75)" id="btn-sheet-75" class="px-4 py-2 rounded-lg text-xs font-bold transition text-white bg-cnOrange-600 shadow-md">
+                        KIIT 75 Sheet (75 Qs)
+                    </button>
+                    <button onclick="selectSheet(150)" id="btn-sheet-150" class="px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white">
+                        KIIT 150 Sheet (150 Qs)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search & Filters Toolbar -->
+            <div class="glass-card p-4 rounded-xl flex flex-col md:flex-row gap-3 justify-between items-center">
+                <!-- Search Box -->
+                <div class="relative w-full md:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                    <input type="text" id="search-input" onkeyup="filterQuestions()" placeholder="Search problem title or #..." class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cnOrange-500 transition">
+                </div>
+
+                <!-- Filter Controls -->
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <!-- Topic Filter -->
+                    <select id="topic-filter" onchange="filterQuestions()" class="bg-slate-900 border border-slate-700 text-xs text-white rounded-lg px-3 py-2 focus:outline-none focus:border-cnOrange-500">
+                        <option value="ALL">All Topics</option>
+                        <option value="Arrays">Arrays</option>
+                        <option value="Strings">Strings</option>
+                        <option value="Linked List">Linked List</option>
+                        <option value="Trees">Trees</option>
+                        <option value="Graphs">Graphs</option>
+                        <option value="Dynamic Programming">Dynamic Programming</option>
+                        <option value="Binary Search">Binary Search</option>
+                    </select>
+
+                    <!-- Difficulty Filter -->
+                    <select id="difficulty-filter" onchange="filterQuestions()" class="bg-slate-900 border border-slate-700 text-xs text-white rounded-lg px-3 py-2 focus:outline-none focus:border-cnOrange-500">
+                        <option value="ALL">All Difficulties</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+
+                    <!-- Status Filter -->
+                    <select id="status-filter" onchange="filterQuestions()" class="bg-slate-900 border border-slate-700 text-xs text-white rounded-lg px-3 py-2 focus:outline-none focus:border-cnOrange-500">
+                        <option value="ALL">All Status</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="PENDING">Unsolved</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Questions Table Container -->
+            <div class="glass-card rounded-2xl overflow-hidden border border-slate-800">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800/80 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-700">
+                                <th class="py-3 px-4 w-12 text-center">Status</th>
+                                <th class="py-3 px-4 w-16">#</th>
+                                <th class="py-3 px-4">Problem Name</th>
+                                <th class="py-3 px-4">Topic</th>
+                                <th class="py-3 px-4">Difficulty</th>
+                                <th class="py-3 px-4 text-center">Solve Platform</th>
+                            </tr>
+                        </thead>
+                        <tbody id="questions-table-body" class="divide-y divide-slate-800/60 font-medium">
+                            <!-- Populated dynamically via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 🏆 VIEW 3: LEADERBOARD VIEW -->
+        <section id="view-leaderboard" class="space-y-6 hidden">
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-l-amber-500 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-400"></i>
+                        <span>KIIT Chapter Top Coders Leaderboard</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Rankings update automatically based on total verified problem solutions.</p>
+                </div>
+                <div class="text-xs font-mono bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl text-slate-300">
+                    <span>Your Current Rank: </span>
+                    <strong class="text-cnOrange-400 text-sm">#4</strong>
+                </div>
+            </div>
+
+            <!-- Top 3 Podium Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Rank 2 Silver -->
+                <div class="glass-card glass-card-hover p-5 rounded-2xl border border-slate-300/20 text-center relative overflow-hidden order-2 md:order-1">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-300 text-slate-900 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                        🥈 2nd Rank
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=120&auto=format&fit=crop&q=80" class="w-16 h-16 rounded-full mx-auto mt-2 border-2 border-slate-300 object-cover">
+                    <h3 class="font-bold text-base text-white mt-2">Rohan Verma</h3>
+                    <p class="text-[11px] text-slate-400">3rd Year • CSE</p>
+                    <div class="mt-3 bg-slate-900/60 p-2 rounded-xl text-xs">
+                        <span class="font-extrabold text-white">142</span> <span class="text-slate-400">/ 225 Solved</span>
+                    </div>
+                </div>
+
+                <!-- Rank 1 Gold -->
+                <div class="glass-card glass-card-hover p-6 rounded-2xl border-2 border-amber-500/50 text-center relative overflow-hidden order-1 md:order-2 bg-gradient-to-b from-amber-500/10 to-transparent">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-900 text-xs font-black px-4 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-amber-500/30">
+                        🥇 1st Rank (Champion)
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80" class="w-20 h-20 rounded-full mx-auto mt-2 border-2 border-amber-400 object-cover shadow-lg shadow-amber-500/20">
+                    <h3 class="font-extrabold text-lg text-white mt-2">Ananya Roy</h3>
+                    <p class="text-xs text-slate-300">4th Year • IT</p>
+                    <div class="mt-3 bg-amber-500/20 border border-amber-500/30 p-2.5 rounded-xl text-xs">
+                        <span class="font-black text-amber-300 text-sm">189</span> <span class="text-amber-200">/ 225 Solved (84%)</span>
+                    </div>
+                </div>
+
+                <!-- Rank 3 Bronze -->
+                <div class="glass-card glass-card-hover p-5 rounded-2xl border border-amber-700/30 text-center relative overflow-hidden order-3">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-800 text-amber-100 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
+                        🥉 3rd Rank
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80" class="w-16 h-16 rounded-full mx-auto mt-2 border-2 border-amber-700 object-cover">
+                    <h3 class="font-bold text-base text-white mt-2">Siddharth Das</h3>
+                    <p class="text-[11px] text-slate-400">3rd Year • CSSE</p>
+                    <div class="mt-3 bg-slate-900/60 p-2 rounded-xl text-xs">
+                        <span class="font-extrabold text-white">128</span> <span class="text-slate-400">/ 225 Solved</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Leaderboard Table -->
+            <div class="glass-card rounded-2xl overflow-hidden border border-slate-800">
+                <div class="p-4 bg-slate-800/60 border-b border-slate-700 flex justify-between items-center">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">KIIT Chapter Overall Standings</h3>
+                    <span class="text-xs text-slate-400">Showing top 10 coders</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="bg-slate-900/80 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                                <th class="py-3 px-4 w-16">Rank</th>
+                                <th class="py-3 px-4">Student</th>
+                                <th class="py-3 px-4 text-center">Questions Solved</th>
+                                <th class="py-3 px-4 text-center">Completion %</th>
+                                <th class="py-3 px-4 text-right">Streak</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 font-medium">
+                            <tr class="bg-amber-500/5 hover:bg-slate-800/60">
+                                <td class="py-3 px-4 font-extrabold text-amber-400">🥇 #1</td>
+                                <td class="py-3 px-4 flex items-center gap-2">
+                                    <span class="font-bold text-white">Ananya Roy</span>
+                                    <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">4th Year</span>
+                                </td>
+                                <td class="py-3 px-4 text-center font-bold text-white">189</td>
+                                <td class="py-3 px-4 text-center text-emerald-400 font-bold">84%</td>
+                                <td class="py-3 px-4 text-right font-mono text-cnOrange-400">🔥 24 days</td>
+                            </tr>
+                            <tr class="bg-slate-300/5 hover:bg-slate-800/60">
+                                <td class="py-3 px-4 font-extrabold text-slate-300">🥈 #2</td>
+                                <td class="py-3 px-4 flex items-center gap-2">
+                                    <span class="font-bold text-white">Rohan Verma</span>
+                                    <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">3rd Year</span>
+                                </td>
+                                <td class="py-3 px-4 text-center font-bold text-white">142</td>
+                                <td class="py-3 px-4 text-center text-emerald-400 font-bold">63%</td>
+                                <td class="py-3 px-4 text-right font-mono text-cnOrange-400">🔥 19 days</td>
+                            </tr>
+                            <tr class="bg-amber-800/5 hover:bg-slate-800/60">
+                                <td class="py-3 px-4 font-extrabold text-amber-600">🥉 #3</td>
+                                <td class="py-3 px-4 flex items-center gap-2">
+                                    <span class="font-bold text-white">Siddharth Das</span>
+                                    <span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">3rd Year</span>
+                                </td>
+                                <td class="py-3 px-4 text-center font-bold text-white">128</td>
+                                <td class="py-3 px-4 text-center text-emerald-400 font-bold">56.8%</td>
+                                <td class="py-3 px-4 text-right font-mono text-cnOrange-400">🔥 15 days</td>
+                            </tr>
+                            <tr class="bg-cnOrange-500/10 hover:bg-cnOrange-500/20 border-l-2 border-l-cnOrange-500">
+                                <td class="py-3 px-4 font-bold text-cnOrange-400">#4 (YOU)</td>
+                                <td class="py-3 px-4 flex items-center gap-2">
+                                    <span class="font-bold text-white">Aarav Sharma</span>
+                                    <span class="text-[10px] bg-cnOrange-500/30 text-cnOrange-300 px-1.5 py-0.5 rounded">YOU</span>
+                                </td>
+                                <td class="py-3 px-4 text-center font-bold text-white" id="lb-your-solved">68</td>
+                                <td class="py-3 px-4 text-center text-emerald-400 font-bold" id="lb-your-pct">30.2%</td>
+                                <td class="py-3 px-4 text-right font-mono text-cnOrange-400">🔥 12 days</td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/60">
+                                <td class="py-3 px-4 text-slate-400">#5</td>
+                                <td class="py-3 px-4 text-white">Priya Mishra</td>
+                                <td class="py-3 px-4 text-center font-bold text-white">61</td>
+                                <td class="py-3 px-4 text-center text-emerald-400 font-bold">27.1%</td>
+                                <td class="py-3 px-4 text-right font-mono text-cnOrange-400">🔥 8 days</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 👤 VIEW 4: PROFILE & ACHIEVEMENTS VIEW -->
+        <section id="view-profile" class="space-y-6 hidden">
+            <!-- User Info Header Card -->
+            <div class="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-center gap-6">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80" class="w-24 h-24 rounded-2xl object-cover border-2 border-cnOrange-500 shadow-xl shadow-cnOrange-500/20">
+                <div class="space-y-1 text-center sm:text-left flex-1">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <h2 class="text-2xl font-black text-white">Aarav Sharma</h2>
+                        <span class="bg-cnOrange-500/20 text-cnOrange-400 text-xs px-2.5 py-0.5 rounded-full font-bold border border-cnOrange-500/30">KIIT B.Tech CSE '25</span>
+                    </div>
+                    <p class="text-xs text-slate-400">aarav.21cs@kiit.ac.in • Joined KIIT Chapter Sep 2024</p>
+                    
+                    <div class="flex flex-wrap gap-4 pt-2">
+                        <div class="text-xs text-slate-300">
+                            <span class="text-slate-500">Solved:</span> <strong class="text-white" id="prof-solved">68</strong>
+                        </div>
+                        <div class="text-xs text-slate-300">
+                            <span class="text-slate-500">Remaining:</span> <strong class="text-white" id="prof-remaining">157</strong>
+                        </div>
+                        <div class="text-xs text-slate-300">
+                            <span class="text-slate-500">Longest Streak:</span> <strong class="text-cnOrange-400">18 Days</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievement Badges Grid -->
+            <div class="glass-card p-6 rounded-2xl space-y-4">
+                <h3 class="font-bold text-lg text-white flex items-center gap-2">
+                    <i class="fa-solid fa-award text-cnOrange-500"></i>
+                    <span>Unlocked Badges & Achievements</span>
+                </h3>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 text-center">
+                    <!-- Badge 1 -->
+                    <div class="p-4 bg-slate-800/80 border border-cnOrange-500/40 rounded-xl flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 rounded-full bg-cnOrange-500/20 flex items-center justify-center text-cnOrange-500 text-2xl">
+                            🚀
+                        </div>
+                        <span class="text-xs font-bold text-white">First Solved</span>
+                        <span class="text-[10px] text-emerald-400 font-semibold">Unlocked</span>
+                    </div>
+
+                    <!-- Badge 2 -->
+                    <div class="p-4 bg-slate-800/80 border border-cnOrange-500/40 rounded-xl flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 rounded-full bg-cnOrange-500/20 flex items-center justify-center text-cnOrange-500 text-2xl">
+                            ⚡
+                        </div>
+                        <span class="text-xs font-bold text-white">10 Solved</span>
+                        <span class="text-[10px] text-emerald-400 font-semibold">Unlocked</span>
+                    </div>
+
+                    <!-- Badge 3 -->
+                    <div class="p-4 bg-slate-800/80 border border-cnOrange-500/40 rounded-xl flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 rounded-full bg-cnOrange-500/20 flex items-center justify-center text-cnOrange-500 text-2xl">
+                            🔥
+                        </div>
+                        <span class="text-xs font-bold text-white">25 Solved</span>
+                        <span class="text-[10px] text-emerald-400 font-semibold">Unlocked</span>
+                    </div>
+
+                    <!-- Badge 4 -->
+                    <div class="p-4 bg-slate-800/80 border border-cnOrange-500/40 rounded-xl flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 rounded-full bg-cnOrange-500/20 flex items-center justify-center text-cnOrange-500 text-2xl">
+                            🎯
+                        </div>
+                        <span class="text-xs font-bold text-white">50 Solved</span>
+                        <span class="text-[10px] text-emerald-400 font-semibold">Unlocked</span>
+                    </div>
+
+                    <!-- Badge 5 Locked -->
+                    <div class="p-4 bg-slate-900/40 border border-slate-800 rounded-xl flex flex-col items-center gap-2 opacity-50">
+                        <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 text-2xl">
+                            🔒
+                        </div>
+                        <span class="text-xs font-bold text-slate-400">75 Master</span>
+                        <span class="text-[10px] text-slate-500">7 Qs away</span>
+                    </div>
+
+                    <!-- Badge 6 Locked -->
+                    <div class="p-4 bg-slate-900/40 border border-slate-800 rounded-xl flex flex-col items-center gap-2 opacity-50">
+                        <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 text-2xl">
+                            🔒
+                        </div>
+                        <span class="text-xs font-bold text-slate-400">100 Solved</span>
+                        <span class="text-[10px] text-slate-500">Locked</span>
+                    </div>
+
+                    <!-- Badge 7 Locked -->
+                    <div class="p-4 bg-slate-900/40 border border-slate-800 rounded-xl flex flex-col items-center gap-2 opacity-50">
+                        <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 text-2xl">
+                            🔒
+                        </div>
+                        <span class="text-xs font-bold text-slate-400">150 Legend</span>
+                        <span class="text-[10px] text-slate-500">Locked</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 🛡️ VIEW 5: ADMIN PANEL VIEW -->
+        <section id="view-admin" class="space-y-6 hidden">
+            <div class="glass-card p-6 rounded-2xl border-l-4 border-l-cnOrange-500 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-user-shield text-cnOrange-500"></i>
+                        <span>Admin Management Console</span>
+                    </h2>
+                    <p class="text-xs text-slate-400">Manage questions in DB, monitor student metrics, and edit sheets.</p>
+                </div>
+                <button onclick="openAddQuestionModal()" class="px-4 py-2 bg-cnOrange-600 hover:bg-cnOrange-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add New DSA Question</span>
+                </button>
+            </div>
+
+            <!-- Admin Overview Metrics -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="glass-card p-4 rounded-xl">
+                    <p class="text-xs text-slate-400 font-semibold">Total Enrolled KIIT Students</p>
+                    <h3 class="text-xl font-black text-white mt-1">1,248</h3>
+                </div>
+                <div class="glass-card p-4 rounded-xl">
+                    <p class="text-xs text-slate-400 font-semibold">Total Solved Submissions</p>
+                    <h3 class="text-xl font-black text-white mt-1">18,940</h3>
+                </div>
+                <div class="glass-card p-4 rounded-xl">
+                    <p class="text-xs text-slate-400 font-semibold">Active Daily Coders</p>
+                    <h3 class="text-xl font-black text-emerald-400 mt-1">342</h3>
+                </div>
+            </div>
+
+            <!-- Question Manager Table -->
+            <div class="glass-card rounded-2xl overflow-hidden border border-slate-800 space-y-4 p-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-bold text-sm text-white">Manage Questions Database</h3>
+                    <span class="text-xs text-slate-400">Showing 5 sample questions</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="bg-slate-800 text-slate-400 uppercase font-semibold">
+                                <th class="p-3">ID</th>
+                                <th class="p-3">Title</th>
+                                <th class="p-3">Sheet</th>
+                                <th class="p-3">Topic</th>
+                                <th class="p-3">Difficulty</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            <tr>
+                                <td class="p-3 font-mono text-slate-400">Q-101</td>
+                                <td class="p-3 font-bold text-white">Two Sum</td>
+                                <td class="p-3"><span class="px-2 py-0.5 rounded bg-cnOrange-500/20 text-cnOrange-400">75 Sheet</span></td>
+                                <td class="p-3">Arrays</td>
+                                <td class="p-3 text-emerald-400">Easy</td>
+                                <td class="p-3 text-right space-x-2">
+                                    <button class="text-blue-400 hover:text-blue-300" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                    <button class="text-rose-400 hover:text-rose-300" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-mono text-slate-400">Q-102</td>
+                                <td class="p-3 font-bold text-white">3Sum</td>
+                                <td class="p-3"><span class="px-2 py-0.5 rounded bg-cnOrange-500/20 text-cnOrange-400">75 Sheet</span></td>
+                                <td class="p-3">Arrays</td>
+                                <td class="p-3 text-amber-400">Medium</td>
+                                <td class="p-3 text-right space-x-2">
+                                    <button class="text-blue-400 hover:text-blue-300" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                    <button class="text-rose-400 hover:text-rose-300" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-mono text-slate-400">Q-201</td>
+                                <td class="p-3 font-bold text-white">Word Ladder II</td>
+                                <td class="p-3"><span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">150 Sheet</span></td>
+                                <td class="p-3">Graphs</td>
+                                <td class="p-3 text-rose-400">Hard</td>
+                                <td class="p-3 text-right space-x-2">
+                                    <button class="text-blue-400 hover:text-blue-300" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                                    <button class="text-rose-400 hover:text-rose-300" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Architecture Code Blueprints Drawer -->
+        <section id="technical-blueprint-drawer" class="mt-12 glass-card rounded-2xl border border-cnOrange-500/30 overflow-hidden">
+            <div class="bg-slate-800/90 px-6 py-4 border-b border-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-cnOrange-500/20 text-cnOrange-500 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-white text-base">Technical Implementation Architecture</h3>
+                        <p class="text-xs text-slate-400">Production Next.js 15, PostgreSQL (Neon), Prisma & Better Auth specifications</p>
+                    </div>
+                </div>
+
+                <!-- Architecture Code Tabs Selector -->
+                <div class="flex flex-wrap items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-700 text-xs">
+                    <button onclick="switchCodeTab('prisma')" id="codetab-prisma" class="code-tab-btn px-3 py-1.5 rounded-lg font-mono font-semibold transition text-white bg-cnOrange-600">schema.prisma</button>
+                    <button onclick="switchCodeTab('seed')" id="codetab-seed" class="code-tab-btn px-3 py-1.5 rounded-lg font-mono font-semibold transition text-slate-400 hover:text-white">prisma/seed.ts</button>
+                    <button onclick="switchCodeTab('package')" id="codetab-package" class="code-tab-btn px-3 py-1.5 rounded-lg font-mono font-semibold transition text-slate-400 hover:text-white">package.json</button>
+                    <button onclick="switchCodeTab('deploy')" id="codetab-deploy" class="code-tab-btn px-3 py-1.5 rounded-lg font-mono font-semibold transition text-slate-400 hover:text-white">Vercel & Neon Guide</button>
+                </div>
+            </div>
+
+            <!-- Code Content Area -->
+            <div class="p-6 font-mono text-xs overflow-x-auto bg-slateDark-950 text-slate-300 custom-scrollbar max-h-96">
+                
+                <!-- Code Tab: Prisma Schema -->
+                <div id="codeblock-prisma" class="space-y-2">
+<pre><code class="text-emerald-400">// prisma/schema.prisma - PostgreSQL Schema optimized for Neon DB & Next.js 15
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum SheetType {
+  SHEET_75
+  SHEET_150
+}
+
+model User {
+  id            String            @id @default(cuid())
+  name          String
+  email         String            @unique
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  
+  // Progress & Badges relations
+  progress      UserProgress[]
+  achievements  UserAchievement[]
+
+  @@map("users")
+}
+
+model Question {
+  id          String         @id @default(cuid())
+  title       String
+  topic       String
+  difficulty  Difficulty
+  leetcodeUrl String
+  sheetType   SheetType
+  createdAt   DateTime       @default(now())
+
+  userProgress UserProgress[]
+
+  @@index([topic])
+  @@index([sheetType])
+  @@map("questions")
+}
+
+model UserProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  questionId  String
+  completed   Boolean  @default(true)
+  completedAt DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@map("user_progress")
+}
+
+model UserAchievement {
+  id          String   @id @default(cuid())
+  userId      String
+  badgeTitle  String
+  unlockedAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_achievements")
+}
+</code></pre>
+                </div>
+
+                <!-- Code Tab: Seed Script -->
+                <div id="codeblock-seed" class="space-y-2 hidden">
+<pre><code class="text-blue-300">// prisma/seed.ts - Automated Seeding Script for Coding Ninjas KIIT Sheets
+import { PrismaClient, Difficulty, SheetType } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+const sheet75Questions = [
+  { title: "Two Sum", topic: "Arrays", difficulty: Difficulty.EASY, leetcodeUrl: "https://leetcode.com/problems/two-sum", sheetType: SheetType.SHEET_75 },
+  { title: "Best Time to Buy and Sell Stock", topic: "Arrays", difficulty: Difficulty.EASY, leetcodeUrl: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock", sheetType: SheetType.SHEET_75 },
+  { title: "Contains Duplicate", topic: "Arrays", difficulty: Difficulty.EASY, leetcodeUrl: "https://leetcode.com/problems/contains-duplicate", sheetType: SheetType.SHEET_75 },
+  { title: "Product of Array Except Self", topic: "Arrays", difficulty: Difficulty.MEDIUM, leetcodeUrl: "https://leetcode.com/problems/product-of-array-except-self", sheetType: SheetType.SHEET_75 },
+  { title: "3Sum", topic: "Arrays", difficulty: Difficulty.MEDIUM, leetcodeUrl: "https://leetcode.com/problems/3sum", sheetType: SheetType.SHEET_75 },
+  { title: "Valid Anagram", topic: "Strings", difficulty: Difficulty.EASY, leetcodeUrl: "https://leetcode.com/problems/valid-anagram", sheetType: SheetType.SHEET_75 },
+  { title: "Valid Parentheses", topic: "Stack", difficulty: Difficulty.EASY, leetcodeUrl: "https://leetcode.com/problems/valid-parentheses", sheetType: SheetType.SHEET_75 },
+  { title: "Invert Binary Tree", topic: "Trees", difficulty: Difficulty.EASY, leetcodeUrl: "https://leetcode.com/problems/invert-binary-tree", sheetType: SheetType.SHEET_75 },
+  { title: "Number of Islands", topic: "Graphs", difficulty: Difficulty.MEDIUM, leetcodeUrl: "https://leetcode.com/problems/number-of-islands", sheetType: SheetType.SHEET_75 },
+  { title: "Climbing Stairs", topic: "Dynamic Programming", difficulty: Difficulty.EASY, leetcodeUrl: "https://leetcode.com/problems/climbing-stairs", sheetType: SheetType.SHEET_75 }
+];
+
+async function main() {
+  console.log('Seeding Coding Ninjas KIIT DSA Questions...');
+  await prisma.question.deleteMany({});
+  
+  for (const q of sheet75Questions) {
+    await prisma.question.create({ data: q });
+  }
+  console.log('Seeding complete! Added sample questions.');
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+</code></pre>
+                </div>
+
+                <!-- Code Tab: package.json -->
+                <div id="codeblock-package" class="space-y-2 hidden">
+<pre><code class="text-amber-300">{
+  "name": "cn-kiit-dsa-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbo",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:seed": "ts-node prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.10.0",
+    "better-auth": "^0.5.0",
+    "canvas-confetti": "^1.6.0",
+    "clsx": "^2.1.0",
+    "lucide-react": "^0.330.0",
+    "next": "15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^2.2.1"
+  },
+  "devDependencies": {
+    "@types/canvas-confetti": "^1.6.4",
+    "@types/node": "^20.11.0",
+    "@types/react": "^19.0.0",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "prisma": "^5.10.0",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3"
+  }
+}
+</code></pre>
+                </div>
+
+                <!-- Code Tab: Vercel & Neon Deployment Guide -->
+                <div id="codeblock-deploy" class="space-y-2 hidden">
+<pre><code class="text-slate-200"># 🚀 Deployment Guide: Vercel + Neon PostgreSQL
+
+## 1. Setup Neon PostgreSQL Database
+1. Go to https://neon.tech and create a new project called "cn-kiit-dsa-tracker".
+2. Copy your pooled PostgreSQL Connection String (starts with postgresql://...).
+
+## 2. Configure Environment Variables
+Create `.env` in project root:
+DATABASE_URL="postgresql://user:password@ep-cool-db-1234.us-east-2.aws.neon.tech/neondb?sslmode=require"
+BETTER_AUTH_SECRET="your-generated-32-byte-secret"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+## 3. Run Database Migrations & Seed
+$ npx prisma migrate dev --name init
+$ npm run db:seed
+
+## 4. Deploy to Vercel
+1. Push project to GitHub.
+2. Import repository into Vercel.
+3. Add `DATABASE_URL` and `BETTER_AUTH_SECRET` in Vercel Project Settings -> Environment Variables.
+4. Click **Deploy**. Vercel will run `prisma generate && next build` automatically!
+</code></pre>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for Admin - Add Question -->
+    <div id="modal-add-question" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="glass-card p-6 rounded-2xl max-w-md w-full border border-slate-700 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-extrabold text-white text-lg">Add DSA Question</h3>
+                <button onclick="closeAddQuestionModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Problem Title</label>
+                    <input type="text" placeholder="e.g. Trapping Rain Water" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 font-semibold mb-1">Sheet</label>
+                        <select class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white">
+                            <option>KIIT 75 Sheet</option>
+                            <option>KIIT 150 Sheet</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 font-semibold mb-1">Difficulty</label>
+                        <select class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white">
+                            <option>Easy</option>
+                            <option>Medium</option>
+                            <option>Hard</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Topic</label>
+                    <input type="text" placeholder="e.g. Dynamic Programming" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white">
+                </div>
+                <div>
+                    <label class="block text-slate-400 font-semibold mb-1">LeetCode URL</label>
+                    <input type="url" placeholder="https://leetcode.com/problems/..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button onclick="closeAddQuestionModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-xs font-bold">Cancel</button>
+                <button onclick="saveNewQuestion()" class="px-4 py-2 bg-cnOrange-600 text-white rounded-lg text-xs font-bold shadow-lg shadow-cnOrange-600/30">Save Question</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="glass-card border-t border-slate-800 mt-12 py-6 px-4 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p>© 2026 Coding Ninjas KIIT Chapter. Built for competitive coders & placement preparation.</p>
+            <div class="flex items-center gap-4">
+                <a href="#" class="hover:text-cnOrange-400">KIIT Portal</a>
+                <a href="#" class="hover:text-cnOrange-400">LeetCode Club</a>
+                <a href="#" class="hover:text-cnOrange-400">Discord Community</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Application Logic Script -->
+    <script>
+        // Sample questions dataset
+        const rawQuestions = [
+            { id: 1, number: 1, title: "Two Sum", topic: "Arrays", difficulty: "Easy", leetcode: "https://leetcode.com/problems/two-sum", completed: true, sheet: 75 },
+            { id: 2, number: 2, title: "Best Time to Buy and Sell Stock", topic: "Arrays", difficulty: "Easy", leetcode: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock", completed: true, sheet: 75 },
+            { id: 3, number: 3, title: "Contains Duplicate", topic: "Arrays", difficulty: "Easy", leetcode: "https://leetcode.com/problems/contains-duplicate", completed: true, sheet: 75 },
+            { id: 4, number: 4, title: "Product of Array Except Self", topic: "Arrays", difficulty: "Medium", leetcode: "https://leetcode.com/problems/product-of-array-except-self", completed: false, sheet: 75 },
+            { id: 5, number: 5, title: "Maximum Subarray (Kadane's)", topic: "Arrays", difficulty: "Medium", leetcode: "https://leetcode.com/problems/maximum-subarray", completed: true, sheet: 75 },
+            { id: 6, number: 6, title: "3Sum", topic: "Arrays", difficulty: "Medium", leetcode: "https://leetcode.com/problems/3sum", completed: true, sheet: 75 },
+            { id: 7, number: 7, title: "Valid Anagram", topic: "Strings", difficulty: "Easy", leetcode: "https://leetcode.com/problems/valid-anagram", completed: true, sheet: 75 },
+            { id: 8, number: 8, title: "Group Anagrams", topic: "Strings", difficulty: "Medium", leetcode: "https://leetcode.com/problems/group-anagrams", completed: false, sheet: 75 },
+            { id: 9, number: 9, title: "Valid Parentheses", topic: "Stack", difficulty: "Easy", leetcode: "https://leetcode.com/problems/valid-parentheses", completed: true, sheet: 75 },
+            { id: 10, number: 10, title: "Reverse Linked List", topic: "Linked List", difficulty: "Easy", leetcode: "https://leetcode.com/problems/reverse-linked-list", completed: true, sheet: 75 },
+            { id: 11, number: 11, title: "Invert Binary Tree", topic: "Trees", difficulty: "Easy", leetcode: "https://leetcode.com/problems/invert-binary-tree", completed: true, sheet: 75 },
+            { id: 12, number: 12, title: "Binary Tree Level Order Traversal", topic: "Trees", difficulty: "Medium", leetcode: "https://leetcode.com/problems/binary-tree-level-order-traversal", completed: true, sheet: 75 },
+            { id: 13, number: 13, title: "Number of Islands", topic: "Graphs", difficulty: "Medium", leetcode: "https://leetcode.com/problems/number-of-islands", completed: false, sheet: 75 },
+            { id: 14, number: 14, title: "Climbing Stairs", topic: "Dynamic Programming", difficulty: "Easy", leetcode: "https://leetcode.com/problems/climbing-stairs", completed: true, sheet: 75 },
+            { id: 15, number: 15, title: "Coin Change", topic: "Dynamic Programming", difficulty: "Medium", leetcode: "https://leetcode.com/problems/coin-change", completed: false, sheet: 75 },
+            { id: 16, number: 101, title: "Median of Two Sorted Arrays", topic: "Binary Search", difficulty: "Hard", leetcode: "https://leetcode.com/problems/median-of-two-sorted-arrays", completed: false, sheet: 150 },
+            { id: 17, number: 102, title: "Trapping Rain Water", topic: "Dynamic Programming", difficulty: "Hard", leetcode: "https://leetcode.com/problems/trapping-rain-water", completed: true, sheet: 150 },
+            { id: 18, number: 103, title: "Word Ladder II", topic: "Graphs", difficulty: "Hard", leetcode: "https://leetcode.com/problems/word-ladder-ii", completed: false, sheet: 150 }
+        ];
+
+        let activeSheet = 75;
+
+        // View Tab Switcher Logic
+        function switchTab(tabId) {
+            const views = ['dashboard', 'sheets', 'leaderboard', 'profile', 'admin'];
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                const btn = document.getElementById(`nav-${v}`);
+                if (v === tabId) {
+                    el.classList.remove('hidden');
+                    btn.classList.add('bg-cnOrange-600', 'text-white', 'shadow-md');
+                    btn.classList.remove('text-slate-400', 'hover:bg-slate-800');
+                } else {
+                    el.classList.add('hidden');
+                    btn.classList.remove('bg-cnOrange-600', 'text-white', 'shadow-md');
+                    btn.classList.add('text-slate-400', 'hover:bg-slate-800');
+                }
+            });
+        }
+
+        // Sheet Switcher (75 vs 150)
+        function selectSheet(sheetNum) {
+            activeSheet = sheetNum;
+            const btn75 = document.getElementById('btn-sheet-75');
+            const btn150 = document.getElementById('btn-sheet-150');
+
+            if (sheetNum === 75) {
+                btn75.className = "px-4 py-2 rounded-lg text-xs font-bold transition text-white bg-cnOrange-600 shadow-md";
+                btn150.className = "px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white";
+            } else {
+                btn150.className = "px-4 py-2 rounded-lg text-xs font-bold transition text-white bg-blue-600 shadow-md";
+                btn75.className = "px-4 py-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-white";
+            }
+            renderQuestionsTable();
+        }
+
+        // Render Questions Table
+        function renderQuestionsTable() {
+            const tbody = document.getElementById('questions-table-body');
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+            const topicVal = document.getElementById('topic-filter').value;
+            const diffVal = document.getElementById('difficulty-filter').value;
+            const statusVal = document.getElementById('status-filter').value;
+
+            const filtered = rawQuestions.filter(q => {
+                if (q.sheet !== activeSheet) return false;
+                if (searchVal && !q.title.toLowerCase().includes(searchVal) && !q.number.toString().includes(searchVal)) return false;
+                if (topicVal !== 'ALL' && q.topic !== topicVal) return false;
+                if (diffVal !== 'ALL' && q.difficulty !== diffVal) return false;
+                if (statusVal === 'COMPLETED' && !q.completed) return false;
+                if (statusVal === 'PENDING' && q.completed) return false;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-slate-500">
+                            No questions found matching your selected filters.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(q => {
+                let diffBadge = 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+                if (q.difficulty === 'Medium') diffBadge = 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+                if (q.difficulty === 'Hard') diffBadge = 'text-rose-400 bg-rose-500/10 border-rose-500/20';
+
+                return `
+                    <tr class="hover:bg-slate-800/50 transition">
+                        <td class="py-3 px-4 text-center">
+                            <input type="checkbox" ${q.completed ? 'checked' : ''} onchange="toggleCompletion(${q.id})" class="w-4 h-4 rounded text-cnOrange-600 bg-slate-900 border-slate-700 focus:ring-cnOrange-500 cursor-pointer">
+                        </td>
+                        <td class="py-3 px-4 font-mono text-slate-400">#${q.number}</td>
+                        <td class="py-3 px-4">
+                            <span class="font-bold ${q.completed ? 'line-through text-slate-400' : 'text-white'}">${q.title}</span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300 border border-slate-700">${q.topic}</span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${diffBadge}">${q.difficulty}</span>
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            <a href="${q.leetcode}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-3 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-lg text-[11px] font-bold transition">
+                                <span>Solve</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Toggle Question Completion
+        function toggleCompletion(id) {
+            const q = rawQuestions.find(item => item.id === id);
+            if (q) {
+                q.completed = !q.completed;
+                if (q.completed) {
+                    confetti({
+                        particleCount: 50,
+                        spread: 60,
+                        origin: { y: 0.8 },
+                        colors: ['#f97316', '#eab308', '#22c55e']
+                    });
+                }
+                updateDashboardStats();
+                renderQuestionsTable();
+            }
+        }
+
+        // Update Dashboard Metrics Realtime
+        function updateDashboardStats() {
+            const totalSolved = rawQuestions.filter(q => q.completed).length;
+            const totalQs = 225; // 75 + 150
+            const pct = ((totalSolved / totalQs) * 100).toFixed(1);
+
+            document.getElementById('dash-solved-count').innerHTML = `${totalSolved} <span class="text-xs text-slate-500 font-normal">/ 225</span>`;
+            document.getElementById('dash-remaining-count').innerText = totalQs - totalSolved;
+            document.getElementById('dash-percent').innerText = `${pct}%`;
+
+            // Profile page mirror stats
+            document.getElementById('prof-solved').innerText = totalSolved;
+            document.getElementById('prof-remaining').innerText = totalQs - totalSolved;
+            document.getElementById('lb-your-solved').innerText = totalSolved;
+            document.getElementById('lb-your-pct').innerText = `${pct}%`;
+        }
+
+        function filterQuestions() {
+            renderQuestionsTable();
+        }
+
+        // Code Tab Switcher
+        function switchCodeTab(tab) {
+            const tabs = ['prisma', 'seed', 'package', 'deploy'];
+            tabs.forEach(t => {
+                const block = document.getElementById(`codeblock-${t}`);
+                const btn = document.getElementById(`codetab-${t}`);
+                if (t === tab) {
+                    block.classList.remove('hidden');
+                    btn.className = "code-tab-btn px-3 py-1.5 rounded-lg font-mono font-semibold transition text-white bg-cnOrange-600";
+                } else {
+                    block.classList.add('hidden');
+                    btn.className = "code-tab-btn px-3 py-1.5 rounded-lg font-mono font-semibold transition text-slate-400 hover:text-white";
+                }
+            });
+        }
+
+        function toggleTechnicalBlueprint() {
+            const el = document.getElementById('technical-blueprint-drawer');
+            el.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Admin Modal Controls
+        function openAddQuestionModal() {
+            document.getElementById('modal-add-question').classList.remove('hidden');
+        }
+        function closeAddQuestionModal() {
+            document.getElementById('modal-add-question').classList.add('hidden');
+        }
+        function saveNewQuestion() {
+            closeAddQuestionModal();
+            confetti({ particleCount: 30, spread: 40 });
+        }
+
+        // Initialize view on load
+        window.onload = function() {
+            renderQuestionsTable();
+            updateDashboardStats();
+        }
+    </script>
+</body>
+</html>
