@@ -1,13 +1,16 @@
 import { UserAvatar } from "@/components/UserAvatar";
 import type { SheetLeaderboardEntry } from "@/lib/services/leaderboard";
+import type { ScoringConfig } from "@/lib/scoring/global";
 
-/** Per-sheet leaderboard standings table (fixed 1/4/8 scoring). */
+/** Per-sheet leaderboard standings table (scored with the sheet's own points). */
 export function SheetStandings({
   sheetName,
   rows,
+  scoring = { easyPoints: 1, mediumPoints: 4, hardPoints: 8 },
 }: {
   sheetName: string;
   rows: SheetLeaderboardEntry[];
+  scoring?: ScoringConfig;
 }) {
   return (
     <div className="glass-card rounded-2xl overflow-hidden border border-slate-800">
@@ -16,7 +19,8 @@ export function SheetStandings({
           {sheetName} Leaderboard
         </h3>
         <span className="text-[11px] text-slate-400">
-          Easy 1 pt · Medium 4 pts · Hard 8 pts — auto-verified from LeetCode
+          Easy {scoring.easyPoints} pt · Medium {scoring.mediumPoints} pts · Hard {scoring.hardPoints} pts —
+          auto-verified from LeetCode + manual ticks
         </span>
       </div>
       <div className="overflow-x-auto">

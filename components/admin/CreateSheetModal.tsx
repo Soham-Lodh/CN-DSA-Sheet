@@ -1,9 +1,14 @@
 "use client";
 
+import type { ScoringConfig } from "@/lib/scoring/global";
+
 export interface SheetModalValues {
   name: string;
   slug: string;
   description: string;
+  easyPoints: number;
+  mediumPoints: number;
+  hardPoints: number;
 }
 
 interface CreateSheetModalProps {
@@ -12,15 +17,25 @@ interface CreateSheetModalProps {
   name: string;
   slug: string;
   description: string;
+  easyPoints: number;
+  mediumPoints: number;
+  hardPoints: number;
   saving: boolean;
   onNameChange: (value: string) => void;
   onSlugChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
+  onPointsChange: (field: keyof ScoringConfig, value: number) => void;
   onCreate: () => void;
   onClose: () => void;
 }
 
 const inputClasses = "w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white";
+
+const pointFields: { field: keyof ScoringConfig; label: string }[] = [
+  { field: "easyPoints", label: "Easy Points" },
+  { field: "mediumPoints", label: "Medium Points" },
+  { field: "hardPoints", label: "Hard Points" },
+];
 
 /** Modal to create a new curated DSA sheet (or edit one when `initial` is set). */
 export function CreateSheetModal({
@@ -28,10 +43,14 @@ export function CreateSheetModal({
   name,
   slug,
   description,
+  easyPoints,
+  mediumPoints,
+  hardPoints,
   saving,
   onNameChange,
   onSlugChange,
   onDescriptionChange,
+  onPointsChange,
   onCreate,
   onClose,
 }: CreateSheetModalProps) {
@@ -88,9 +107,37 @@ export function CreateSheetModal({
             />
           </div>
 
-          <p className="text-[11px] text-slate-500">
-            Scoring is fixed for all sheets: Easy = 1 pt, Medium = 4 pts, Hard = 8 pts.
-          </p>
+          {/* Per-sheet scoring configuration */}
+          <div>
+            <label className="block text-slate-400 font-semibold mb-1">
+              Scoring Points (per solved question)
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {pointFields.map(({ field, label }) => {
+                const value =
+                  field === "easyPoints" ? easyPoints : field === "mediumPoints" ? mediumPoints : hardPoints;
+                return (
+                  <div key={field}>
+                    <label className="block text-[10px] text-slate-500 font-semibold mb-1 uppercase tracking-wide">
+                      {label}
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      max={1000}
+                      step={1}
+                      value={value}
+                      onChange={(e) => onPointsChange(field, Number(e.target.value))}
+                      className={`${inputClasses} font-mono`}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-[10px] text-slate-500 mt-1.5">
+              Defaults follow the global scheme: Easy 1 · Medium 4 · Hard 8 pts.
+            </p>
+          </div>
 
           <div className="pt-2 flex items-center justify-end gap-2">
             <button

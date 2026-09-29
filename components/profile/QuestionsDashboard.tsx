@@ -97,7 +97,15 @@ export function QuestionsDashboard({ sheets }: QuestionsDashboardProps) {
                   Up next
                 </p>
                 {nextUnsolved.map((q) => (
-                  <UnsolvedRow key={q.id} question={q} />
+                  <UnsolvedRow
+                    key={q.id}
+                    question={q}
+                    scoring={{
+                      easyPoints: sheet.sheet.easyPoints,
+                      mediumPoints: sheet.sheet.mediumPoints,
+                      hardPoints: sheet.sheet.hardPoints,
+                    }}
+                  />
                 ))}
               </div>
             );
@@ -108,7 +116,13 @@ export function QuestionsDashboard({ sheets }: QuestionsDashboardProps) {
   );
 }
 
-function UnsolvedRow({ question }: { question: SheetQuestionItem }) {
+function UnsolvedRow({
+  question,
+  scoring,
+}: {
+  question: SheetQuestionItem;
+  scoring: { easyPoints: number; mediumPoints: number; hardPoints: number };
+}) {
   return (
     <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-800/50 border border-slate-800">
       <div className="flex items-center gap-2 min-w-0">
@@ -122,7 +136,7 @@ function UnsolvedRow({ question }: { question: SheetQuestionItem }) {
           {question.difficulty}
         </span>
         <span className="text-[10px] text-slate-500 font-mono flex-shrink-0">
-          {pointsForDifficulty(question.difficulty)} pts
+          {pointsForDifficulty(question.difficulty, scoring)} pts
         </span>
       </div>
       <a

@@ -13,6 +13,7 @@ import { AccountsTab } from "./AccountsTab";
 import { AdminsTab } from "./AdminsTab";
 import { AddQuestionModal, ParsedProblem } from "./AddQuestionModal";
 import { CreateSheetModal, SheetModalValues } from "./CreateSheetModal";
+import { DEFAULT_SHEET_SCORING } from "@/lib/scoring/global";
 import { EditQuestionModal } from "./EditQuestionModal";
 
 const tabs: { id: AdminTab; label: string; icon: typeof Plus }[] = [
@@ -57,7 +58,12 @@ export function AdminView({ data }: { data: AdminData }) {
   // Create/Edit Sheet modal state
   const [showSheetModal, setShowSheetModal] = useState(false);
   const [editingSheetId, setEditingSheetId] = useState<string | null>(null);
-  const [sheetForm, setSheetForm] = useState<SheetModalValues>({ name: "", slug: "", description: "" });
+  const [sheetForm, setSheetForm] = useState<SheetModalValues>({
+    name: "",
+    slug: "",
+    description: "",
+    ...DEFAULT_SHEET_SCORING,
+  });
   const [savingSheet, setSavingSheet] = useState(false);
 
   // Questions table filters
@@ -166,13 +172,28 @@ export function AdminView({ data }: { data: AdminData }) {
 
   const openCreateSheet = () => {
     setEditingSheetId(null);
-    setSheetForm({ name: "", slug: "", description: "" });
+    setSheetForm({ name: "", slug: "", description: "", ...DEFAULT_SHEET_SCORING });
     setShowSheetModal(true);
   };
 
-  const openEditSheet = (sheet: { id: string; name: string; slug: string; description: string | null }) => {
+  const openEditSheet = (sheet: {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    easyPoints: number;
+    mediumPoints: number;
+    hardPoints: number;
+  }) => {
     setEditingSheetId(sheet.id);
-    setSheetForm({ name: sheet.name, slug: sheet.slug, description: sheet.description || "" });
+    setSheetForm({
+      name: sheet.name,
+      slug: sheet.slug,
+      description: sheet.description || "",
+      easyPoints: sheet.easyPoints,
+      mediumPoints: sheet.mediumPoints,
+      hardPoints: sheet.hardPoints,
+    });
     setShowSheetModal(true);
   };
 
@@ -181,10 +202,21 @@ export function AdminView({ data }: { data: AdminData }) {
     setSavingSheet(true);
     setActionError(null);
     try {
+      const pointsPayload = {
+        easyPoints: Number.isFinite(sheetForm.easyPoints) ? sheetForm.easyPoints : DEFAULT_SHEET_SCORING.easyPoints,
+        mediumPoints: Number.isFinite(sheetForm.mediumPoints)
+          ? sheetForm.mediumPoints
+          : DEFAULT_SHEET_SCORING.mediumPoints,
+        hardPoints: Number.isFinite(sheetForm.hardPoints) ? sheetForm.hardPoints : DEFAULT_SHEET_SCORING.hardPoints,
+      };
       if (editingSheetId) {
         await postJson(
           `/api/admin/sheets/${editingSheetId}`,
-          { name: sheetForm.name.trim(), description: sheetForm.description.trim() },
+          {
+            name: sheetForm.name.trim(),
+            description: sheetForm.description.trim(),
+            ...pointsPayload,
+          },
           "PATCH"
         );
       } else {
@@ -193,11 +225,12 @@ export function AdminView({ data }: { data: AdminData }) {
           slug: sheetForm.slug.trim().toLowerCase(),
           description: sheetForm.description.trim(),
           status: SheetStatus.PUBLISHED,
+          ...pointsPayload,
         });
       }
       setShowSheetModal(false);
       setEditingSheetId(null);
-      setSheetForm({ name: "", slug: "", description: "" });
+      setSheetForm({ name: "", slug: "", description: "", ...DEFAULT_SHEET_SCORING });
       router.refresh();
     } catch (err: any) {
       setActionError(err.message || "Failed to save sheet");
@@ -305,7 +338,7 @@ export function AdminView({ data }: { data: AdminData }) {
             <span>Admin Management Console</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Manage LeetCode questions, sheets, verified student accounts, and roles. Scoring is fixed: Easy 1 pt · Medium 4 pts · Hard 8 pts.
+            Manage LeetCode questions, sheets, verified student accounts, and roles. Each sheet can set its own Easy/Medium/Hard points (default 1 · 4 · 8).
           </p>
         </div>
 
@@ -451,12 +484,16 @@ export function AdminView({ data }: { data: AdminData }) {
           name={sheetForm.name}
           slug={sheetForm.slug}
           description={sheetForm.description}
+          easyPoints={sheetForm.easyPoints}
+          mediumPoints={sheetForm.mediumPoints}
+          hardPoints={sheetForm.hardPoints}
           saving={savingSheet}
           onNameChange={(name) => setSheetForm((p) => ({ ...p, name }))}
           onSlugChange={(slug) =>
             setSheetForm((p) => ({ ...p, slug: editingSheetId ? p.slug : slug || slugify(p.name) }))
           }
           onDescriptionChange={(description) => setSheetForm((p) => ({ ...p, description }))}
+          onPointsChange={(field, value) => setSheetForm((p) => ({ ...p, [field]: value }))}
           onCreate={handleSaveSheet}
           onClose={() => {
             setShowSheetModal(false);

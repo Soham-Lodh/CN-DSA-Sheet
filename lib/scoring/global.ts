@@ -8,12 +8,16 @@ export interface ScoringConfig {
 }
 
 /** The global default every sheet starts with: Easy 1 · Medium 4 · Hard 8. */
-export const DEFAULT_SHEET_SCORING: ScoringConfig = SCORING_POINTS;
+export const DEFAULT_SHEET_SCORING: ScoringConfig = {
+  easyPoints: SCORING_POINTS.EASY,
+  mediumPoints: SCORING_POINTS.MEDIUM,
+  hardPoints: SCORING_POINTS.HARD,
+};
 
 /** Points for a solved question by difficulty (UNKNOWN/unscored -> 0). */
 export function pointsForDifficulty(
   difficulty: string | null | undefined,
-  config: ScoringConfig = SCORING_POINTS
+  config: ScoringConfig = DEFAULT_SHEET_SCORING
 ): number {
   switch (difficulty) {
     case "EASY":

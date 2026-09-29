@@ -57,6 +57,10 @@ export function SheetsTab({
               <span>Questions: {s._count?.sheetQuestions ?? 0}</span>
             </div>
 
+            <p className="text-[10px] text-slate-500 font-mono">
+              Points — Easy {s.easyPoints} · Medium {s.mediumPoints} · Hard {s.hardPoints}
+            </p>
+
             <div className="flex items-center justify-between pt-2">
               <div className="flex items-center gap-3">
                 <button
@@ -77,7 +81,7 @@ export function SheetsTab({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => onEditSheet(s)}
-                  title="Edit sheet name/description"
+                  title="Edit sheet name/description/scoring"
                   className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
                 >
                   <Pencil className="w-3.5 h-3.5" />

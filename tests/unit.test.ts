@@ -2,7 +2,11 @@ import { describe, it, expect, afterEach } from "vitest";
 import { extractRollNumber } from "../lib/auth";
 import { requireSupabaseEnv, SUPABASE_ENV_ERROR } from "../lib/supabase/env";
 import { parseProblemUrl } from "../lib/platform/url-parser";
-import { tallyDifficulty } from "../lib/scoring/global";
+import {
+  tallyDifficulty,
+  pointsForDifficulty,
+  DEFAULT_SHEET_SCORING,
+} from "../lib/scoring/global";
 
 describe("Roll Number Extraction Unit Tests", () => {
   it("extracts roll number from standard KIIT email", () => {
@@ -93,5 +97,24 @@ describe("Fixed Scoring Engine (1/4/8)", () => {
     expect(tally.hardSolved).toBe(3);
     // 1*1 + 2*4 + 3*8 = 33
     expect(tally.score).toBe(33);
+  });
+
+  it("defaults to the global 1/4/8 scheme", () => {
+    expect(DEFAULT_SHEET_SCORING).toEqual({ easyPoints: 1, mediumPoints: 4, hardPoints: 8 });
+  });
+
+  it("scores with a sheet-specific Easy/Medium/Hard config", () => {
+    const config = { easyPoints: 2, mediumPoints: 10, hardPoints: 20 };
+    expect(pointsForDifficulty("EASY", config)).toBe(2);
+    expect(pointsForDifficulty("MEDIUM", config)).toBe(10);
+    expect(pointsForDifficulty("HARD", config)).toBe(20);
+    expect(pointsForDifficulty("UNKNOWN", config)).toBe(0);
+    expect(pointsForDifficulty("HARD")).toBe(8); // no config -> global default
+  });
+
+  it("falls back gracefully for unknown difficulties with custom configs", () => {
+    const config = { easyPoints: 5, mediumPoints: 5, hardPoints: 5 };
+    expect(pointsForDifficulty(undefined, config)).toBe(0);
+    expect(pointsForDifficulty(null, config)).toBe(0);
   });
 });

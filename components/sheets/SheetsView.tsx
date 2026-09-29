@@ -152,7 +152,7 @@ export function SheetsView({ initialSheets, activeSheetData, sheetLeaderboard = 
 
           {/* Sub-tabs: Questions vs Leaderboard */}
           <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
-            {([[\"questions\", `Questions Table (${currentQuestions.length})`, false], [\"leaderboard\", \"Sheet Leaderboard\", true]] as const).map(
+            {([["questions", `Questions Table (${currentQuestions.length})`, false], ["leaderboard", "Sheet Leaderboard", true]] as const).map(
               ([tab, label, isTrophy]) => (
                 <button
                   key={tab}

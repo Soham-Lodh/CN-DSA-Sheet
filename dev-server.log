@@ -4,62 +4,65 @@
    - Environments: .env
 
  ✓ Starting...
- ✓ Ready in 2.6s
- ○ Compiling /middleware ...
- ✓ Compiled /middleware in 1202ms (174 modules)
+ ✓ Ready in 4.6s
+ ✓ Compiled /middleware in 498ms (174 modules)
  ○ Compiling /sheets ...
-<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (113kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
-<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (268kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
- ✓ Compiled /sheets in 5.9s (898 modules)
- GET /sheets 200 in 16899ms
- GET /sheets 200 in 7508ms
- GET /sheets 200 in 7916ms
- GET /sheets 200 in 7720ms
-prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
-prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
- ○ Compiling / ...
- ✓ Compiled / in 873ms (900 modules)
- ✓ Compiled in 786ms (338 modules)
- GET / 200 in 1767ms
+ ✓ Compiled /sheets in 4.7s (880 modules)
+ GET /sheets 200 in 15621ms
+ GET /sheets 200 in 14547ms
  ○ Compiling /dashboard ...
- ✓ Compiled /dashboard in 869ms (927 modules)
- GET /dashboard 200 in 1949ms
- GET /dashboard 200 in 3596ms
- GET /sheets 200 in 9076ms
- GET /sheets 200 in 8871ms
- GET /sheets 200 in 253ms
- ○ Compiling /auth/callback ...
- ✓ Compiled /auth/callback in 590ms (935 modules)
- GET /auth/callback?code=f1432b6f-a5c9-4700-96e8-a54afdae2e84 307 in 2372ms
- GET /dashboard 200 in 6565ms
- GET /sheets 200 in 12584ms
- ○ Compiling /api/sheets/progress ...
- ✓ Compiled /api/sheets/progress in 544ms (937 modules)
- POST /api/sheets/progress 200 in 4631ms
- POST /api/sheets/progress 200 in 3774ms
- GET /sheets 200 in 12502ms
- GET /sheets 200 in 11771ms
- GET /sheets 200 in 12067ms
- GET /sheets 200 in 13474ms
- ○ Compiling /admin ...
- ✓ Compiled /admin in 1790ms (987 modules)
- GET /admin 200 in 8419ms
- GET /admin 200 in 5993ms
- ○ Compiling /sheets/[slug] ...
- ✓ Compiled /sheets/[slug] in 699ms (989 modules)
- GET /admin 200 in 6127ms
- GET /sheets/kiit-dsa-150 200 in 7604ms
- GET /sheets/k 200 in 20699ms
- GET /admin 200 in 6409ms
- GET /sheets/kiit-dsa-150 200 in 10625ms
- ○ Compiling /api/admin/sheets/[id] ...
- ✓ Compiled /api/admin/sheets/[id] in 1788ms (1092 modules)
- DELETE /api/admin/sheets/cmulqdd8y0001kwngkr6jcayh 200 in 6037ms
- GET /admin 200 in 7671ms
- GET /admin 200 in 5869ms
+ ✓ Compiled /dashboard in 927ms (908 modules)
+ GET /dashboard 200 in 8819ms
+ GET /dashboard 200 in 7806ms
+ GET /sheets 200 in 13051ms
+ ✓ Compiled /api/sheets/progress in 463ms (902 modules)
+ POST /api/sheets/progress 200 in 4426ms
+ ○ Compiling /api/sheets/[slug]/leaderboard ...
+ ✓ Compiled /api/sheets/[slug]/leaderboard in 859ms (906 modules)
+ GET /api/sheets/kiit-dsa-75 200 in 7297ms
+ GET /api/sheets/kiit-dsa-75/leaderboard 200 in 7204ms
+ POST /api/sheets/progress 200 in 3618ms
+ GET /api/sheets/kiit-dsa-75 200 in 3065ms
+ GET /sheets 200 in 11740ms
+ GET /api/sheets/kiit-dsa-75/leaderboard 200 in 2972ms
+ GET /sheets 200 in 12909ms
+ POST /api/sheets/progress 200 in 4112ms
+ GET /api/sheets/kiit-dsa-75/leaderboard 200 in 4852ms
+ GET /api/sheets/kiit-dsa-75 200 in 5187ms
+ GET /sheets 200 in 11411ms
+ GET /sheets 200 in 12973ms
+ GET /dashboard 200 in 6032ms
+ GET /dashboard 200 in 5624ms
+ ○ Compiling /leaderboard ...
+ ✓ Compiled /leaderboard in 1592ms (922 modules)
+ GET /leaderboard 200 in 5795ms
+ GET /dashboard 200 in 5920ms
  ○ Compiling /profile ...
- ✓ Compiled /profile in 1801ms (1025 modules)
- GET /profile 200 in 4620ms
- GET /profile 200 in 7553ms
- GET /dashboard 200 in 8711ms
-[?25h
+ ✓ Compiled /profile in 802ms (955 modules)
+ GET /profile 200 in 6521ms
+ ○ Compiling /api/profile/platforms ...
+ ✓ Compiled /api/profile/platforms in 835ms (1061 modules)
+ DELETE /api/profile/platforms 200 in 3981ms
+ GET /profile 200 in 5344ms
+ ○ Compiling /sheets/[slug] ...
+ ✓ Compiled /sheets/[slug] in 591ms (1063 modules)
+ GET /sheets/kiit-dsa-75 200 in 8556ms
+ POST /api/profile/platforms 200 in 17051ms
+ POST /api/profile/platforms 200 in 15785ms
+ GET /profile 200 in 6653ms
+ POST /api/profile/platforms 200 in 18052ms
+ POST /api/profile/platforms 200 in 18643ms
+ POST /api/profile/platforms 200 in 19559ms
+ POST /api/profile/platforms 200 in 17218ms
+ GET /profile 200 in 5120ms
+ GET /profile 200 in 4822ms
+ GET /profile 200 in 6021ms
+ GET /profile 200 in 5113ms
+ GET /sheets/kiit-dsa-75 200 in 2475ms
+ POST /api/profile/platforms 200 in 17872ms
+ GET /profile 200 in 5723ms
+ GET /profile 200 in 4953ms
+ GET /sheets/kiit-dsa-75 200 in 5975ms
+ GET /sheets/kiit-dsa-75 200 in 6533ms
+ GET /sheets/kiit-dsa-75 200 in 2482ms
+ GET /sheets/kiit-dsa-75 200 in 5977ms
