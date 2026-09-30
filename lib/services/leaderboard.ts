@@ -92,7 +92,7 @@ export async function getGlobalLeaderboard(): Promise<GlobalLeaderboardEntry[]> 
 
 /**
  * Per-sheet leaderboard: rank by sheet questions solved, scored with the
- * sheet's own Easy/Medium/Hard point values (default 1/4/8).
+ * sheet's own Easy/Medium/Hard point values (default 3/5/8).
  */
 export async function getSheetLeaderboard(sheetId: string): Promise<SheetLeaderboardEntry[]> {
   const sheet = await prisma.sheet.findUnique({

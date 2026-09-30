@@ -7,7 +7,7 @@ export interface ScoringConfig {
   hardPoints: number;
 }
 
-/** The global default every sheet starts with: Easy 1 · Medium 4 · Hard 8. */
+/** The global default every sheet starts with: Easy 3 · Medium 5 · Hard 8. */
 export const DEFAULT_SHEET_SCORING: ScoringConfig = {
   easyPoints: SCORING_POINTS.EASY,
   mediumPoints: SCORING_POINTS.MEDIUM,
@@ -37,7 +37,7 @@ export interface DifficultyCounts {
   hardSolved: number;
 }
 
-/** Sum of difficulty counts and the 1/4/8 score in one pass. */
+/** Sum of difficulty counts and the 3/5/8 score in one pass. */
 export function tallyDifficulty(
   items: { difficulty: string | null | undefined }[],
 ): DifficultyCounts & { score: number } {

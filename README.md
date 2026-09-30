@@ -202,11 +202,11 @@ To ensure fair competition across the university without inflation, the platform
 
 $$\text{Total Score} = (N_{\text{Easy}} \times 1) + (N_{\text{Medium}} \times 4) + (N_{\text{Hard}} \times 8)$$
 
-- **Easy Problems:** `1 Point`
-- **Medium Problems:** `4 Points`
+- **Easy Problems:** `3 Point`
+- **Medium Problems:** `5 Points`
 - **Hard Problems:** `8 Points`
 
-Sheets can optionally define custom point weights, but the standard 1/4/8 configuration is adopted by default across all KIIT leaderboards.
+Sheets can optionally define custom point weights, but the standard 3/5/8 configuration is adopted by default across all KIIT leaderboards.
 
 ---
 

@@ -48,7 +48,7 @@ export const createSheetSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with hyphens"),
   description: z.string().max(1000).optional().nullable(),
   status: sheetStatusEnum.default(SheetStatus.DRAFT),
-  // Per-sheet scoring; defaults mirror the global 1/4/8 scheme.
+  // Per-sheet scoring; defaults mirror the global 3/5/8 scheme.
   easyPoints: pointsField("Easy").default(1),
   mediumPoints: pointsField("Medium").default(4),
   hardPoints: pointsField("Hard").default(8),
