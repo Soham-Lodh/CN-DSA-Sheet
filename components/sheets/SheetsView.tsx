@@ -93,18 +93,18 @@ export function SheetsView({ initialSheets, activeSheetData, sheetLeaderboard = 
   }, [currentQuestions, searchQuery, topicFilter, difficultyFilter, statusFilter]);
 
   const selectClasses =
-    "bg-slate-900 border border-slate-700 text-xs text-white rounded-lg px-3 py-2 focus:outline-none focus:border-cnOrange-500";
+    "bg-surface-page border border-outline-subtle text-xs text-content-primary rounded-lg px-3 py-2 focus:outline-none focus:border-brand-primary";
 
   return (
     <div className="space-y-6">
       {/* Sheet Switcher Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl border-l-4 border-l-cnOrange-500">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl border-l-4 border-l-brand-primary">
         <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
-            <BookMarked className="w-5 h-5 text-cnOrange-500" />
+          <h1 className="text-xl sm:text-2xl font-extrabold text-content-primary flex items-center gap-2">
+            <BookMarked className="w-5 h-5 text-brand-primary" />
             <span>Curated DSA Sheets</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-content-muted mt-1">
             Questions are auto-ticked from your synced LeetCode submissions — or tick them
             yourself below. Scoring: Easy {sheetData?.sheet.easyPoints ?? 1} · Medium{" "}
             {sheetData?.sheet.mediumPoints ?? 4} · Hard {sheetData?.sheet.hardPoints ?? 8} pts.
@@ -116,7 +116,7 @@ export function SheetsView({ initialSheets, activeSheetData, sheetLeaderboard = 
           <select
             value={sheetData?.sheet.slug ?? initialSheets[0].slug}
             onChange={(e) => router.push(`/sheets/${e.target.value}`)}
-            className="bg-slateDark-900 border border-slate-700 text-sm text-white font-bold rounded-xl px-4 py-2.5 focus:outline-none focus:border-cnOrange-500 cursor-pointer"
+            className="bg-surface-page border border-outline-subtle text-sm text-content-primary font-bold rounded-xl px-4 py-2.5 focus:outline-none focus:border-brand-primary cursor-pointer"
           >
             {initialSheets.map((sheet) => (
               <option key={sheet.id} value={sheet.slug}>
@@ -132,18 +132,18 @@ export function SheetsView({ initialSheets, activeSheetData, sheetLeaderboard = 
           {/* Active Sheet Progress Stats Banner (live) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 relative">
             {[
-              { label: "Total Problems", value: sheetData.totalQuestions, valueClasses: "text-white" },
-              { label: "Your Solved", value: sheetData.solvedQuestions, valueClasses: "text-emerald-400" },
-              { label: "Remaining", value: sheetData.remainingQuestions, valueClasses: "text-amber-400" },
-              { label: "Completion", value: `${sheetData.completionPercent}%`, valueClasses: "text-cnOrange-400" },
+              { label: "Total Problems", value: sheetData.totalQuestions, valueClasses: "text-content-primary" },
+              { label: "Your Solved", value: sheetData.solvedQuestions, valueClasses: "text-status-success" },
+              { label: "Remaining", value: sheetData.remainingQuestions, valueClasses: "text-brand-accent" },
+              { label: "Completion", value: `${sheetData.completionPercent}%`, valueClasses: "text-brand-accent" },
             ].map((stat) => (
               <div key={stat.label} className="glass-card p-4 rounded-xl">
-                <p className="text-[11px] text-slate-400 font-semibold uppercase">{stat.label}</p>
+                <p className="text-[11px] text-content-muted font-semibold uppercase">{stat.label}</p>
                 <h3 className={`text-xl font-black mt-1 ${stat.valueClasses}`}>{stat.value}</h3>
               </div>
             ))}
             {refreshing && (
-              <div className="absolute -top-5 right-0 flex items-center gap-1.5 text-[10px] text-slate-500">
+              <div className="absolute -top-5 right-0 flex items-center gap-1.5 text-[10px] text-content-muted">
                 <Loader2 className="w-3 h-3 animate-spin" />
                 <span>updating…</span>
               </div>
@@ -151,7 +151,7 @@ export function SheetsView({ initialSheets, activeSheetData, sheetLeaderboard = 
           </div>
 
           {/* Sub-tabs: Questions vs Leaderboard */}
-          <div className="flex items-center gap-2 border-b border-slate-800 pb-2">
+          <div className="flex items-center gap-2 border-b border-outline-subtle pb-2">
             {([["questions", `Questions Table (${currentQuestions.length})`, false], ["leaderboard", "Sheet Leaderboard", true]] as const).map(
               ([tab, label, isTrophy]) => (
                 <button
@@ -159,12 +159,12 @@ export function SheetsView({ initialSheets, activeSheetData, sheetLeaderboard = 
                   onClick={() => setActiveTab(tab)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
                     activeTab === tab
-                      ? "bg-slate-800 text-white border border-slate-700"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-surface-elevated text-content-primary border border-outline-subtle"
+                      : "text-content-muted hover:text-content-primary"
                   }`}
                 >
                   {isTrophy ? (
-                    <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                    <Trophy className="w-3.5 h-3.5 text-brand-accent" />
                   ) : (
                     <BookMarked className="w-3.5 h-3.5" />
                   )}
@@ -179,13 +179,13 @@ export function SheetsView({ initialSheets, activeSheetData, sheetLeaderboard = 
               {/* Search & Filter Toolbar */}
               <div className="glass-card p-4 rounded-xl flex flex-col md:flex-row gap-3 justify-between items-center">
                 <div className="relative w-full md:w-80">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search problem title or position..."
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cnOrange-500 transition"
+                    className="w-full bg-surface-page border border-outline-subtle rounded-lg pl-9 pr-3 py-2 text-xs text-content-primary placeholder-content-muted focus:outline-none focus:border-brand-primary transition"
                   />
                 </div>
 

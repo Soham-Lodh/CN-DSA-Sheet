@@ -13,8 +13,8 @@ export function MetricCard({ label, value, footer, icon: Icon, iconClasses }: Me
   return (
     <div className="glass-card glass-card-hover p-5 rounded-xl flex items-center justify-between">
       <div>
-        <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">{label}</p>
-        <h3 className="text-2xl font-black text-white mt-1">{value}</h3>
+        <p className="text-content-muted text-xs font-semibold uppercase tracking-wider">{label}</p>
+        <h3 className="text-2xl font-black text-content-primary mt-1">{value}</h3>
         {footer}
       </div>
       <div

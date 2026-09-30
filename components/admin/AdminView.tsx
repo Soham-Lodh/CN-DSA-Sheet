@@ -331,13 +331,13 @@ export function AdminView({ data }: { data: AdminData }) {
   return (
     <div className="space-y-6">
       {/* Admin Header */}
-      <div className="glass-card p-6 rounded-2xl border-l-4 border-l-cnOrange-500 flex flex-col md:flex-row justify-between md:items-center gap-4">
+      <div className="glass-card p-6 rounded-2xl border-l-4 border-l-brand-primary flex flex-col md:flex-row justify-between md:items-center gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-            <ShieldAlert className="w-6 h-6 text-cnOrange-500" />
+          <h1 className="text-xl sm:text-2xl font-black text-content-primary flex items-center gap-2">
+            <ShieldAlert className="w-6 h-6 text-brand-primary" />
             <span>Admin Management Console</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-content-muted mt-1">
             Manage LeetCode questions, sheets, verified student accounts, and roles. Each sheet can set its own Easy/Medium/Hard points (default 1 · 4 · 8).
           </p>
         </div>
@@ -345,16 +345,16 @@ export function AdminView({ data }: { data: AdminData }) {
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => setShowAddQuestionModal(true)}
-            className="px-4 py-2 rounded-xl bg-cnOrange-600 hover:bg-cnOrange-700 text-white font-bold text-xs flex items-center gap-2 transition shadow-md shadow-cnOrange-600/20"
+            className="px-4 py-2 rounded-xl bg-brand-primary hover:bg-brand-hover text-content-primary font-bold text-xs flex items-center gap-2 transition shadow-md shadow-brand-primary/20"
           >
             <Plus className="w-4 h-4" />
             <span>Add DSA Question</span>
           </button>
           <button
             onClick={openCreateSheet}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 flex items-center gap-2 transition"
+            className="px-4 py-2 rounded-xl bg-surface-elevated hover:bg-outline-subtle text-content-primary font-bold text-xs border border-outline-subtle flex items-center gap-2 transition"
           >
-            <BookMarked className="w-4 h-4 text-cnOrange-500" />
+            <BookMarked className="w-4 h-4 text-brand-primary" />
             <span>Create Sheet</span>
           </button>
         </div>
@@ -362,22 +362,22 @@ export function AdminView({ data }: { data: AdminData }) {
 
       {/* Action error banner */}
       {actionError && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+        <div className="p-4 rounded-xl bg-status-danger/10 border border-status-danger/30 text-status-danger text-xs flex items-center gap-2">
           <ShieldAlert className="w-4 h-4 flex-shrink-0" />
           <span>{actionError}</span>
         </div>
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-3">
+      <div className="flex flex-wrap items-center gap-2 border-b border-outline-subtle pb-3">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
               activeTab === id
-                ? "bg-cnOrange-600 text-white shadow-md shadow-cnOrange-600/20"
-                : "bg-slate-800/80 text-slate-400 hover:text-white"
+                ? "bg-brand-primary text-content-primary shadow-md shadow-brand-primary/20"
+                : "bg-surface-elevated/80 text-content-muted hover:text-content-primary"
             }`}
           >
             <Icon className="w-3.5 h-3.5" />

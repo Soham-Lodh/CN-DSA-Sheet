@@ -19,6 +19,7 @@ import { ActivityHeatmap } from "@/components/activity/ActivityHeatmap";
 import type { CombinedActivity } from "@/lib/services/activity";
 import { UserAvatar } from "@/components/UserAvatar";
 import { SCORING_POINTS } from "@/lib/scoring/global";
+import { formatUtcDate } from "@/lib/formatters/date";
 
 interface ProfileViewProps {
   profile: {
@@ -132,13 +133,13 @@ export function ProfileView({
 
       {/* Notifications */}
       {actionError && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+        <div className="p-4 rounded-xl bg-status-danger/10 border border-status-danger/30 text-status-danger text-xs flex items-center gap-2">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{actionError}</span>
         </div>
       )}
       {actionSuccess && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+        <div className="p-4 rounded-xl bg-status-success/10 border border-status-success/30 text-status-success text-xs flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
           <span>{actionSuccess}</span>
         </div>
@@ -147,11 +148,11 @@ export function ProfileView({
       {/* LeetCode Connection Card */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-cnOrange-500" />
+          <h2 className="text-base font-bold text-content-primary flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-brand-primary" />
             <span>Connected Coding Platform</span>
           </h2>
-          <span className="text-xs text-slate-400">Syncs every 10+ minutes automatically</span>
+          <span className="text-xs text-content-muted">Syncs every 10+ minutes automatically</span>
         </div>
 
         <PlatformCard
@@ -178,8 +179,8 @@ export function ProfileView({
       {/* Combined Activity Heatmap */}
       <div className="glass-card p-6 rounded-2xl space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <CalendarDays className="w-4 h-4 text-cnOrange-500" />
+          <h2 className="text-base font-bold text-content-primary flex items-center gap-2">
+            <CalendarDays className="w-4 h-4 text-brand-primary" />
             <span>Coding Activity (Last 1 Year)</span>
           </h2>
         </div>
@@ -188,8 +189,8 @@ export function ProfileView({
 
       {/* Questions Dashboard: per-sheet auto-derived question status */}
       <div className="space-y-3">
-        <h2 className="text-base font-bold text-white flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-cnOrange-500" />
+        <h2 className="text-base font-bold text-content-primary flex items-center gap-2">
+          <BookOpen className="w-4 h-4 text-brand-primary" />
           <span>Questions Dashboard</span>
         </h2>
         <QuestionsDashboard sheets={sheetProgress} />
@@ -216,48 +217,45 @@ function ProfileHeader({
   onSync: () => void;
 }) {
   return (
-    <div className="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-center gap-6 border-l-4 border-l-cnOrange-500 relative">
+    <div className="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-center gap-6 border-l-4 border-l-brand-primary relative">
       <UserAvatar
         avatarUrl={profile.avatarUrl}
         name={profile.name}
         sizeClasses="w-24 h-24"
-        className="!rounded-2xl border-2 border-cnOrange-500 shadow-xl shadow-cnOrange-500/20"
+        className="!rounded-2xl border-2 border-brand-primary shadow-xl shadow-brand-primary/20"
       />
 
       <div className="space-y-1 text-center sm:text-left flex-1">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-          <h1 className="text-2xl font-black text-white">{profile.name}</h1>
-          <span className="bg-cnOrange-500/20 text-cnOrange-400 text-xs px-2.5 py-0.5 rounded-full font-bold border border-cnOrange-500/30">
+          <h1 className="text-2xl font-black text-content-primary">{profile.name}</h1>
+          <span className="bg-brand-primary/20 text-brand-accent text-xs px-2.5 py-0.5 rounded-full font-bold border border-brand-primary/30">
             {profile.rollNumber ? `KIIT Roll: ${profile.rollNumber}` : "KIIT Student"}
           </span>
           {profile.role === "ADMIN" && (
-            <span className="bg-rose-500/20 text-rose-300 text-xs px-2.5 py-0.5 rounded-full font-bold border border-rose-500/30">
+            <span className="bg-status-danger/20 text-status-danger text-xs px-2.5 py-0.5 rounded-full font-bold border border-status-danger/30">
               ADMIN
             </span>
           )}
         </div>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-content-muted">
           {profile.email} • Joined{" "}
-          {new Date(profile.createdAt).toLocaleDateString("en-US", {
-            month: "short",
-            year: "numeric",
-          })}
+          {formatUtcDate(profile.createdAt)}
         </p>
 
         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-2">
-          <div className="text-xs text-slate-300">
-            <span className="text-slate-500">Total Solved:</span>{" "}
-            <strong className="text-white">{totalSolved}</strong>
+          <div className="text-xs text-content-secondary">
+            <span className="text-content-muted">Total Solved:</span>{" "}
+            <strong className="text-content-primary">{totalSolved}</strong>
           </div>
-          <div className="text-xs text-slate-300">
-            <span className="text-slate-500">Global Rank:</span>{" "}
-            <strong className="text-cnOrange-400">
+          <div className="text-xs text-content-secondary">
+            <span className="text-content-muted">Global Rank:</span>{" "}
+            <strong className="text-brand-accent">
               {globalRank ? `#${globalRank}` : "Unranked"}
             </strong>
           </div>
-          <div className="text-xs text-slate-300">
-            <span className="text-slate-500">LeetCode:</span>{" "}
-            <strong className={connected ? "text-emerald-400" : "text-slate-500"}>
+          <div className="text-xs text-content-secondary">
+            <span className="text-content-muted">LeetCode:</span>{" "}
+            <strong className={connected ? "text-status-success" : "text-content-muted"}>
               {connected ? "Connected" : "Not connected"}
             </strong>
           </div>
@@ -269,9 +267,9 @@ function ProfileHeader({
         <button
           onClick={onSync}
           disabled={syncing || !connected}
-          className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center gap-2 transition disabled:opacity-50"
+          className="px-4 py-2 rounded-xl bg-surface-elevated hover:bg-outline-subtle text-content-secondary border border-outline-subtle font-bold text-xs flex items-center gap-2 transition disabled:opacity-50"
         >
-          <RefreshCw className={`w-3.5 h-3.5 text-cnOrange-500 ${syncing ? "animate-spin" : ""}`} />
+          <RefreshCw className={`w-3.5 h-3.5 text-brand-primary ${syncing ? "animate-spin" : ""}`} />
           <span>{syncing ? "Syncing..." : "Refresh Coding Stats"}</span>
         </button>
       </div>

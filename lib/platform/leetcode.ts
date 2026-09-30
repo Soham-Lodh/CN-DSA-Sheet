@@ -21,7 +21,6 @@ function mapLeetCodeDifficulty(diff?: string): Difficulty {
 }
 
 export class LeetCodeProvider implements PlatformProvider {
-
   private async graphqlQuery(query: string, variables: Record<string, any>) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
@@ -118,13 +117,20 @@ export class LeetCodeProvider implements PlatformProvider {
       name: user.profile?.realName || undefined,
       avatarUrl: user.profile?.userAvatar || undefined,
       ranking: user.profile?.ranking || undefined,
-      rating: data?.userContestRanking?.rating ? Math.round(data.userContestRanking.rating) : undefined,
-      rank: data?.userContestRanking?.globalRanking ? `#${data.userContestRanking.globalRanking}` : undefined,
+      rating: data?.userContestRanking?.rating
+        ? Math.round(data.userContestRanking.rating)
+        : undefined,
+      rank: data?.userContestRanking?.globalRanking
+        ? `#${data.userContestRanking.globalRanking}`
+        : undefined,
     };
   }
 
   /** Fetch one year's submissionCalendar as a epoch-seconds -> count map. */
-  private async fetchCalendar(username: string, year: number): Promise<Record<string, number>> {
+  private async fetchCalendar(
+    username: string,
+    year: number,
+  ): Promise<Record<string, number>> {
     const query = `
       query getUserCalendar($username: String!, $year: Int!) {
         matchedUser(username: $username) {
@@ -212,8 +218,12 @@ export class LeetCodeProvider implements PlatformProvider {
     }
     submissionCalendar = { ...lastYearCalendar, ...submissionCalendar };
 
-    const rating = data?.userContestRanking?.rating ? Math.round(data.userContestRanking.rating) : undefined;
-    const rank = data?.userContestRanking?.globalRanking ? `#${data.userContestRanking.globalRanking}` : undefined;
+    const rating = data?.userContestRanking?.rating
+      ? Math.round(data.userContestRanking.rating)
+      : undefined;
+    const rank = data?.userContestRanking?.globalRanking
+      ? `#${data.userContestRanking.globalRanking}`
+      : undefined;
 
     return {
       totalSolved,
@@ -262,7 +272,9 @@ export class LeetCodeProvider implements PlatformProvider {
       solvedRecords.push({
         externalKey,
         title: sub.title,
-        solvedAt: sub.timestamp ? new Date(parseInt(sub.timestamp, 10) * 1000) : undefined,
+        solvedAt: sub.timestamp
+          ? new Date(parseInt(sub.timestamp, 10) * 1000)
+          : undefined,
         sourceSubmissionId: sub.id ? String(sub.id) : undefined,
         source: "leetcode_ac_list",
       });
@@ -272,7 +284,7 @@ export class LeetCodeProvider implements PlatformProvider {
   }
 
   async fetchProblemMetadata(
-    externalKey: string
+    externalKey: string,
   ): Promise<PlatformProblemMetadata | null> {
     const slug = externalKey.startsWith("leetcode:")
       ? externalKey.replace("leetcode:", "")
@@ -300,16 +312,31 @@ export class LeetCodeProvider implements PlatformProvider {
       const tags = (q.topicTags || []).map((t: any) => t.name);
       const mainTopic = tags[0] || "General";
 
-    return {
-      externalKey: `leetcode:${slug.toLowerCase()}`,
-      title: q.title,
-      difficulty: mapLeetCodeDifficulty(q.difficulty),
-      topic: mainTopic,
-      tags,
-      url: `https://leetcode.com/problems/${slug.toLowerCase()}/`,
-    };
+      return {
+        externalKey: `leetcode:${slug.toLowerCase()}`,
+        title: q.title,
+        difficulty: mapLeetCodeDifficulty(q.difficulty),
+        topic: mainTopic,
+        tags,
+        url: `https://leetcode.com/problems/${slug.toLowerCase()}/`,
+      };
     } catch {
       return null;
     }
+  }
+}
+export async function fetchLeetCodePotd(): Promise<string | null> {
+  const query = `query { activeDailyCodingChallengeQuestion { link } }`;
+  try {
+    const res = await fetch("https://leetcode.com/graphql", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    });
+    const json = await res.json();
+    const link = json?.data?.activeDailyCodingChallengeQuestion?.link;
+    return link ? `https://leetcode.com${link}` : null;
+  } catch {
+    return null;
   }
 }

@@ -80,7 +80,7 @@ describe("LeetCode URL Parsing Unit Tests", () => {
   });
 });
 
-describe("Fixed Scoring Engine (1/4/8)", () => {
+describe("Fixed Scoring Engine (3/5/8)", () => {
   it("computes leaderboard tallies from difficulty counts", () => {
     const tally = tallyDifficulty([
       { difficulty: "EASY" },
@@ -95,12 +95,12 @@ describe("Fixed Scoring Engine (1/4/8)", () => {
     expect(tally.easySolved).toBe(1);
     expect(tally.mediumSolved).toBe(2);
     expect(tally.hardSolved).toBe(3);
-    // 1*1 + 2*4 + 3*8 = 33
-    expect(tally.score).toBe(33);
+    // 1*3 + 2*5 + 3*8 = 37
+    expect(tally.score).toBe(37);
   });
 
-  it("defaults to the global 1/4/8 scheme", () => {
-    expect(DEFAULT_SHEET_SCORING).toEqual({ easyPoints: 1, mediumPoints: 4, hardPoints: 8 });
+  it("defaults to the global 3/5/8 scheme", () => {
+    expect(DEFAULT_SHEET_SCORING).toEqual({ easyPoints: 3, mediumPoints: 5, hardPoints: 8 });
   });
 
   it("scores with a sheet-specific Easy/Medium/Hard config", () => {

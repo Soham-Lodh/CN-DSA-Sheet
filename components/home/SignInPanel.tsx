@@ -79,30 +79,30 @@ export function SignInPanel() {
   if (checkingAuth) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-4 border-cnOrange-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="glass-card p-8 md:p-12 rounded-3xl relative overflow-hidden border-l-4 border-l-cnOrange-500 text-center md:text-left">
+    <div className="glass-card p-8 md:p-12 rounded-3xl relative overflow-hidden border-l-4 border-l-brand-primary text-center md:text-left">
       <div className="max-w-3xl space-y-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cnOrange-500/10 border border-cnOrange-500/30 text-cnOrange-400 text-xs font-bold">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-primary/10 border border-brand-primary/30 text-brand-accent text-xs font-bold">
           <Sparkles className="w-3.5 h-3.5" />
           <span>EXCLUSIVELY FOR KIIT UNIVERSITY STUDENTS</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-white">
+        <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-content-primary">
           Level Up Your DSA with <span className="gradient-orange-text">Automated Sync</span> & KIIT Rankings
         </h1>
 
-        <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-          The official competitive programming and interview preparation tracker for KIITians. Connect your LeetCode account — sheet progress, streaks and rankings update automatically from your verified submissions (Easy 1 · Medium 4 · Hard 8 pts).
+        <p className="text-content-secondary text-sm sm:text-base leading-relaxed">
+          The official competitive programming and interview preparation tracker for KIITians. Connect your LeetCode account — sheet progress, streaks and rankings update automatically from your verified submissions (Easy 3 · Medium 5 · Hard 8 pts).
         </p>
 
         {authError && (
-          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-3 text-left">
-            <Lock className="w-5 h-5 flex-shrink-0 text-rose-400" />
+          <div className="p-4 rounded-xl bg-status-danger/10 border border-status-danger/30 text-status-danger text-xs flex items-center gap-3 text-left">
+            <Lock className="w-5 h-5 flex-shrink-0 text-status-danger" />
             <span>{authError}</span>
           </div>
         )}
@@ -111,7 +111,7 @@ export function SignInPanel() {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-cnOrange-600 to-amber-500 hover:from-cnOrange-500 hover:to-amber-400 text-white font-black text-sm shadow-xl shadow-cnOrange-600/30 transition flex items-center justify-center gap-3 disabled:opacity-50"
+            className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-brand-primary to-brand-accent hover:from-brand-primary hover:to-brand-accent text-content-primary font-black text-sm shadow-xl shadow-brand-primary/30 transition flex items-center justify-center gap-3 disabled:opacity-50"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z" />
@@ -124,10 +124,10 @@ export function SignInPanel() {
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs text-slate-400 pt-2">
+        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs text-content-muted pt-2">
           {["Restricted to @kiit.ac.in", "Zero manual checkboxes", "Live LeetCode Rankings"].map((label) => (
             <span key={label} className="flex items-center gap-1.5">
-              <CheckCircle className="w-4 h-4 text-emerald-400" />
+              <CheckCircle className="w-4 h-4 text-status-success" />
               <span>{label}</span>
             </span>
           ))}

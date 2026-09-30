@@ -1,4 +1,4 @@
-export const SCORING_POINTS = { EASY: 1, MEDIUM: 4, HARD: 8 } as const;
+export const SCORING_POINTS = { EASY: 3, MEDIUM: 5, HARD: 8 } as const;
 
 /** Per-sheet scoring configuration (Sheet.easyPoints/mediumPoints/hardPoints). */
 export interface ScoringConfig {
@@ -7,7 +7,7 @@ export interface ScoringConfig {
   hardPoints: number;
 }
 
-/** The global default every sheet starts with: Easy 1 · Medium 4 · Hard 8. */
+/** The global default every sheet starts with: Easy 3 · Medium 5 · Hard 8. */
 export const DEFAULT_SHEET_SCORING: ScoringConfig = {
   easyPoints: SCORING_POINTS.EASY,
   mediumPoints: SCORING_POINTS.MEDIUM,
@@ -17,7 +17,7 @@ export const DEFAULT_SHEET_SCORING: ScoringConfig = {
 /** Points for a solved question by difficulty (UNKNOWN/unscored -> 0). */
 export function pointsForDifficulty(
   difficulty: string | null | undefined,
-  config: ScoringConfig = DEFAULT_SHEET_SCORING
+  config: ScoringConfig = DEFAULT_SHEET_SCORING,
 ): number {
   switch (difficulty) {
     case "EASY":
@@ -37,8 +37,10 @@ export interface DifficultyCounts {
   hardSolved: number;
 }
 
-/** Sum of difficulty counts and the 1/4/8 score in one pass. */
-export function tallyDifficulty(items: { difficulty: string | null | undefined }[]): DifficultyCounts & { score: number } {
+/** Sum of difficulty counts and the 3/5/8 score in one pass. */
+export function tallyDifficulty(
+  items: { difficulty: string | null | undefined }[],
+): DifficultyCounts & { score: number } {
   let easySolved = 0;
   let mediumSolved = 0;
   let hardSolved = 0;

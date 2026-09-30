@@ -13,9 +13,9 @@ export function AchievementsGrid({ totalSolved }: { totalSolved: number }) {
   ];
 
   return (
-    <div className="glass-card p-6 rounded-2xl space-y-4 border border-slate-800">
-      <h3 className="font-bold text-base text-white flex items-center gap-2">
-        <Award className="w-5 h-5 text-cnOrange-500" />
+    <div className="glass-card p-6 rounded-2xl space-y-4 border border-outline-subtle">
+      <h3 className="font-bold text-base text-content-primary flex items-center gap-2">
+        <Award className="w-5 h-5 text-brand-primary" />
         <span>Achievements & Badges</span>
       </h3>
 
@@ -27,17 +27,17 @@ export function AchievementsGrid({ totalSolved }: { totalSolved: number }) {
               key={badge.title}
               className={`p-4 rounded-xl flex flex-col items-center gap-2 transition ${
                 isUnlocked
-                  ? "bg-slate-800/80 border border-cnOrange-500/40"
-                  : "bg-slate-900/40 border border-slate-800 opacity-40"
+                  ? "bg-surface-elevated/80 border border-brand-primary/40"
+                  : "bg-surface-page/40 border border-outline-subtle opacity-40"
               }`}
             >
-              <div className="w-12 h-12 rounded-full bg-cnOrange-500/10 flex items-center justify-center text-2xl">
+              <div className="w-12 h-12 rounded-full bg-brand-primary/10 flex items-center justify-center text-2xl">
                 {badge.icon}
               </div>
-              <span className="text-xs font-bold text-white">{badge.title}</span>
+              <span className="text-xs font-bold text-content-primary">{badge.title}</span>
               <span
                 className={`text-[10px] font-semibold ${
-                  isUnlocked ? "text-emerald-400" : "text-slate-500"
+                  isUnlocked ? "text-status-success" : "text-content-muted"
                 }`}
               >
                 {isUnlocked ? "Unlocked" : `${badge.threshold - totalSolved} Qs away`}

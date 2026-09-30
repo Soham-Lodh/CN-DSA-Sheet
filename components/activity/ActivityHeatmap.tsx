@@ -7,14 +7,14 @@ import type { ActivityDay, CombinedActivity } from "@/lib/services/activity";
  * rendered from both server pages and client containers.
  */
 
-const WEEKS_SHOWN = 53; // Full 1-year window, GitHub-style
+const MONTHS_SHOWN = 12;
 
 const LEVEL_CLASSES = [
-  "bg-slate-800",
-  "bg-cnOrange-900/70",
-  "bg-cnOrange-700",
-  "bg-cnOrange-600",
-  "bg-cnOrange-500",
+  "bg-surface-elevated",
+  "bg-brand-glow",
+  "bg-brand-hover",
+  "bg-brand-accent",
+  "bg-brand-primary",
 ] as const;
 
 const MONTH_NAMES = [
@@ -35,107 +35,117 @@ function isoDate(date: Date): string {
 }
 
 interface HeatmapCell {
-  iso: string | null;
+  iso: string;
   day?: ActivityDay;
 }
 
-function buildColumns(days: ActivityDay[], todayIso: string): HeatmapCell[][] {
-  const byDate = new Map(days.map((d) => [d.date, d]));
-  const today = new Date(`${todayIso}T00:00:00Z`);
-  const start = new Date(today.getTime() - (WEEKS_SHOWN * 7 - 1) * 86_400_000);
-
-  // Align the first column to Monday (GitHub-style layout).
-  const startDay = start.getUTCDay(); // 0 = Sunday
-  const leadPad = (startDay + 6) % 7; // blanks before the first Monday
-
-  const cells: HeatmapCell[] = [];
-  for (let i = 0; i < leadPad; i++) cells.push({ iso: null });
-  for (let i = 0; i < WEEKS_SHOWN * 7 - leadPad; i++) {
-    const d = new Date(start.getTime() + i * 86_400_000);
-    const iso = isoDate(d);
-    cells.push({ iso, day: iso <= todayIso ? byDate.get(iso) : undefined });
-  }
-
-  const columns: HeatmapCell[][] = [];
-  for (let i = 0; i < cells.length; i += 7) columns.push(cells.slice(i, i + 7));
-  return columns;
+interface HeatmapMonth {
+  label: string;
+  columns: HeatmapCell[][];
 }
 
-function monthLabels(columns: HeatmapCell[][]): (string | null)[] {
-  const labels: (string | null)[] = [];
-  let lastMonth = -1;
-  for (const column of columns) {
-    const first = column.find((c) => c.iso !== null)?.iso;
-    if (!first) {
-      labels.push(null);
-      continue;
+function buildMonths(days: ActivityDay[], todayIso: string): HeatmapMonth[] {
+  const byDate = new Map(days.map((d) => [d.date, d]));
+  const today = new Date(`${todayIso}T00:00:00Z`);
+
+  return Array.from({ length: MONTHS_SHOWN }, (_, monthOffset) => {
+    const month = new Date(
+      Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - (MONTHS_SHOWN - 1 - monthOffset), 1),
+    );
+    const monthIndex = month.getUTCMonth();
+    const daysInMonth = new Date(
+      Date.UTC(month.getUTCFullYear(), monthIndex + 1, 0),
+    ).getUTCDate();
+    const leadingCells = (month.getUTCDay() + 6) % 7; // Monday-first
+    const columnCount = Math.ceil((leadingCells + daysInMonth) / 7);
+    const cells: HeatmapCell[] = [];
+
+    for (let cellIndex = 0; cellIndex < columnCount * 7; cellIndex++) {
+      const dayOfMonth = cellIndex - leadingCells + 1;
+      const date = new Date(
+        Date.UTC(month.getUTCFullYear(), monthIndex, dayOfMonth),
+      );
+      const iso = isoDate(date);
+      const belongsToMonth = dayOfMonth >= 1 && dayOfMonth <= daysInMonth;
+
+      cells.push({
+        iso,
+        day: belongsToMonth && iso <= todayIso ? byDate.get(iso) : undefined,
+      });
     }
-    const month = new Date(`${first}T00:00:00Z`).getUTCMonth();
-    labels.push(month !== lastMonth ? MONTH_NAMES[month] : null);
-    lastMonth = month;
-  }
-  return labels;
+
+    const columns: HeatmapCell[][] = [];
+    for (let i = 0; i < cells.length; i += 7) columns.push(cells.slice(i, i + 7));
+
+    return { label: MONTH_NAMES[monthIndex], columns };
+  });
 }
 
 function tooltipFor(day: ActivityDay): string {
   return `${day.count} problem${day.count === 1 ? "" : "s"} solved on ${day.date}`;
 }
 
-/** GitHub-style activity heatmap of verified LeetCode solves (last 1 year). */
+/** LeetCode-style monthly activity heatmap of verified solves (last 12 months). */
 export function ActivityHeatmap({ activity }: { activity: CombinedActivity }) {
   const todayIso = isoDate(new Date());
-  const columns = buildColumns(activity.days, todayIso);
-  const labels = monthLabels(columns);
+  const months = buildMonths(activity.days, todayIso);
 
   return (
     <div className="space-y-4">
-      <div className="p-4 bg-slateDark-900/90 rounded-xl border border-slate-800 overflow-x-auto custom-scrollbar">
-        <div className="min-w-[900px]">
-          {/* Month labels row */}
-          <div className="flex gap-1 mb-1.5 pl-0.5">
-            {labels.map((label, i) => (
-              <div key={i} className="w-3 text-[9px] text-slate-500 font-medium whitespace-nowrap">
-                {label ?? ""}
-              </div>
-            ))}
-          </div>
+      <div className="w-fit max-w-full p-4 bg-surface-base/90 rounded-xl border border-outline-subtle overflow-x-auto custom-scrollbar">
+        {/* Each month is an independent calendar block, matching LeetCode's layout. */}
+        <div className="w-max flex items-start gap-4">
+          {months.map((month) => (
+            <div key={month.label} className="flex flex-col items-center gap-2">
+              <div className="flex gap-1">
+                {month.columns.map((column, ci) => (
+                  <div key={ci} className="flex flex-col gap-1">
+                    {column.map((cell, ri) => {
+                      const isCurrentMonth = new Date(`${cell.iso}T00:00:00Z`).getUTCMonth() ===
+                        MONTH_NAMES.indexOf(month.label);
 
-          {/* Week columns */}
-          <div className="flex gap-1">
-            {columns.map((column, ci) => (
-              <div key={ci} className="flex flex-col gap-1">
-                {column.map((cell, ri) =>
-                  cell.iso === null ? (
-                    <div key={ri} className="w-3 h-3 rounded-sm" />
-                  ) : (
-                    <div
-                      key={ri}
-                      className={`w-3 h-3 rounded-sm transition-transform hover:scale-125 ${
-                        LEVEL_CLASSES[levelForCount(cell.day?.count ?? 0)]
-                      }`}
-                      title={cell.day ? tooltipFor(cell.day) : `No submissions on ${cell.iso}`}
-                    />
-                  )
-                )}
+                      return (
+                        <div
+                          key={ri}
+                          className={`w-3 h-3 rounded-sm transition-transform hover:scale-125 ${
+                            isCurrentMonth
+                              ? LEVEL_CLASSES[levelForCount(cell.day?.count ?? 0)]
+                              : "bg-transparent"
+                          }`}
+                          title={
+                            isCurrentMonth
+                              ? cell.day
+                                ? tooltipFor(cell.day)
+                                : `No submissions on ${cell.iso}`
+                              : undefined
+                          }
+                        />
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+              <span className="text-xs text-content-secondary font-medium">
+                {month.label}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-content-secondary">
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
-            <Flame className="w-3.5 h-3.5 text-cnOrange-500" />
+            <Flame className="w-3.5 h-3.5 text-brand-primary" />
             <span>
-              Current streak: <strong className="text-white">{activity.currentStreak}d</strong>
-              {" · "}Best: <strong className="text-white">{activity.longestStreak}d</strong>
+              Current streak: <strong className="text-content-primary">{activity.currentStreak}d</strong>
+              {" · "}Best: <strong className="text-content-primary">{activity.longestStreak}d</strong>
             </span>
           </span>
           <span className="flex items-center gap-1.5">
-            <CalendarDays className="w-3.5 h-3.5 text-slate-500" />
+            <CalendarDays className="w-3.5 h-3.5 text-content-muted" />
             <span>
-              Active days: <strong className="text-white">{activity.activeDays}</strong>
+              Active days: <strong className="text-content-primary">{activity.activeDays}</strong>
               {" · "}
               {activity.totalSubmissions} submissions
             </span>
@@ -151,7 +161,7 @@ export function ActivityHeatmap({ activity }: { activity: CombinedActivity }) {
         </div>
       </div>
 
-      <p className="text-[10px] text-slate-500">
+      <p className="text-[10px] text-content-muted">
         Verified LeetCode activity over the last 1 year, synced automatically
         from your accepted submissions.
       </p>

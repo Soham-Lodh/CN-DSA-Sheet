@@ -40,13 +40,13 @@ export function QuestionsTab({
   });
 
   return (
-    <div className="glass-card rounded-2xl p-5 space-y-4 border border-slate-800">
+    <div className="glass-card rounded-2xl p-5 space-y-4 border border-outline-subtle">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div className="flex items-center gap-3">
           <select
             value={filterSheetId}
             onChange={(e) => onFilterSheetChange(e.target.value)}
-            className="bg-slate-900 border border-slate-700 text-xs text-white rounded-lg px-3 py-2"
+            className="bg-surface-page border border-outline-subtle text-xs text-content-primary rounded-lg px-3 py-2"
           >
             <option value="ALL">All Sheets</option>
             {sheets.map((s) => (
@@ -57,20 +57,20 @@ export function QuestionsTab({
           </select>
 
           <div className="relative w-64">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" />
             <input
               type="text"
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Filter by title / topic..."
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500"
+              className="w-full bg-surface-page border border-outline-subtle rounded-lg pl-9 pr-3 py-1.5 text-xs text-content-primary placeholder-content-muted"
             />
           </div>
         </div>
 
         <button
           onClick={onAddQuestion}
-          className="px-4 py-2 bg-cnOrange-600 hover:bg-cnOrange-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 self-start sm:self-auto"
+          className="px-4 py-2 bg-brand-primary hover:bg-brand-hover text-content-primary rounded-xl text-xs font-bold transition flex items-center gap-1.5 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Question</span>
@@ -80,7 +80,7 @@ export function QuestionsTab({
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead>
-            <tr className="bg-slate-800 text-slate-400 uppercase font-semibold">
+            <tr className="bg-surface-elevated text-content-muted uppercase font-semibold">
               <th className="py-3 px-4 w-12 text-center">#</th>
               <th className="py-3 px-4">Problem Title</th>
               <th className="py-3 px-4">Sheet</th>
@@ -89,37 +89,37 @@ export function QuestionsTab({
               <th className="py-3 px-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800">
+          <tbody className="divide-y divide-outline-subtle">
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-slate-500">
+                <td colSpan={6} className="py-8 text-center text-content-muted">
                   No questions found in this sheet.
                 </td>
               </tr>
             ) : (
               filtered.map((sq) => (
-                <tr key={sq.id} className="hover:bg-slate-800/60">
-                  <td className="py-3 px-4 text-center font-mono text-slate-400">{sq.position}</td>
+                <tr key={sq.id} className="hover:bg-surface-elevated/60">
+                  <td className="py-3 px-4 text-center font-mono text-content-muted">{sq.position}</td>
                   <td className="py-3 px-4">
                     <a
                       href={sq.question.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-bold text-white hover:text-cnOrange-400 flex items-center gap-1.5"
+                      className="font-bold text-content-primary hover:text-brand-accent flex items-center gap-1.5"
                     >
                       <span>{sq.question.title}</span>
-                      <ExternalLink className="w-3 h-3 text-slate-500" />
+                      <ExternalLink className="w-3 h-3 text-content-muted" />
                     </a>
-                    <span className="text-[10px] font-mono text-slate-500">
+                    <span className="text-[10px] font-mono text-content-muted">
                       {sq.question.externalKey}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-slate-300">
-                    <span className="bg-slate-800 px-2 py-0.5 rounded text-[10px]">
+                  <td className="py-3 px-4 text-content-secondary">
+                    <span className="bg-surface-elevated px-2 py-0.5 rounded text-[10px]">
                       {sq.sheet?.name}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-slate-400">{sq.question.topic}</td>
+                  <td className="py-3 px-4 text-content-muted">{sq.question.topic}</td>
                   <td className="py-3 px-4">
                     <span
                       className={`px-2 py-0.5 rounded text-[10px] font-bold ${
@@ -133,14 +133,14 @@ export function QuestionsTab({
                     <button
                       onClick={() => onEditQuestion(sq)}
                       title="Edit title/topic/difficulty"
-                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition mr-1"
+                      className="p-1.5 rounded-lg bg-surface-elevated hover:bg-outline-subtle text-content-secondary transition mr-1"
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => onRemoveQuestion(sq.id)}
                       title="Remove from sheet"
-                      className="p-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 transition"
+                      className="p-1.5 rounded-lg bg-status-danger/20 hover:bg-status-danger/40 text-status-danger transition"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
