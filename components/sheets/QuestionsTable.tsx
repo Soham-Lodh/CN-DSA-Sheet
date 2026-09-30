@@ -57,16 +57,16 @@ export function QuestionsTable({ questions, scoring, onToggleComplete }: Questio
   };
 
   return (
-    <div className="glass-card rounded-2xl overflow-hidden border border-slate-800">
+    <div className="glass-card rounded-2xl overflow-hidden border border-outline-subtle">
       {error && (
-        <div className="p-3 bg-rose-500/10 border-b border-rose-500/30 text-rose-300 text-xs">
+        <div className="p-3 bg-status-danger/10 border-b border-status-danger/30 text-status-danger text-xs">
           {error}
         </div>
       )}
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="bg-slate-800/80 text-slate-400 font-semibold uppercase tracking-wider border-b border-slate-700">
+            <tr className="bg-surface-elevated/80 text-content-muted font-semibold uppercase tracking-wider border-b border-outline-subtle">
               <th className="py-3 px-4 w-14 text-center">Solved</th>
               <th className="py-3 px-4 w-14 text-center">#</th>
               <th className="py-3 px-4">Problem Name</th>
@@ -76,10 +76,10 @@ export function QuestionsTable({ questions, scoring, onToggleComplete }: Questio
               <th className="py-3 px-4 text-center">Solve</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 font-medium">
+          <tbody className="divide-y divide-outline-subtle/60 font-medium">
             {questions.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-slate-500">
+                <td colSpan={7} className="py-8 text-center text-content-muted">
                   No problems match your current filter criteria.
                 </td>
               </tr>
@@ -91,7 +91,7 @@ export function QuestionsTable({ questions, scoring, onToggleComplete }: Questio
                 return (
                   <tr
                     key={q.id}
-                    className={`transition hover:bg-slate-800/60 ${isSolved ? "bg-slate-500/[0.04]" : ""}`}
+                    className={`transition hover:bg-surface-elevated/60 ${isSolved ? "bg-outline-hairline" : ""}`}
                   >
                     <td className="py-3 px-4 text-center">
                       <button
@@ -105,27 +105,27 @@ export function QuestionsTable({ questions, scoring, onToggleComplete }: Questio
                         className="inline-flex items-center justify-center disabled:opacity-60 cursor-pointer"
                       >
                         {isPending ? (
-                          <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
+                          <Loader2 className="w-4 h-4 text-content-muted animate-spin" />
                         ) : isSolved ? (
-                          <CheckCircle2 className="w-4 h-4 text-cnOrange-400" />
+                          <CheckCircle2 className="w-4 h-4 text-brand-accent" />
                         ) : (
-                          <Circle className="w-4 h-4 text-slate-600 hover:text-cnOrange-400" />
+                          <Circle className="w-4 h-4 text-content-muted hover:text-brand-accent" />
                         )}
                       </button>
                     </td>
-                    <td className="py-3 px-4 text-center font-mono text-slate-400">{q.position}</td>
+                    <td className="py-3 px-4 text-center font-mono text-content-muted">{q.position}</td>
                     <td className="py-3 px-4">
                       <a
                         href={q.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-bold text-white hover:text-cnOrange-400 transition"
+                        className="font-bold text-content-primary hover:text-brand-accent transition"
                       >
                         {q.title}
                       </a>
                     </td>
-                    <td className="py-3 px-4 text-slate-300">
-                      <span className="bg-slate-800/80 px-2 py-0.5 rounded text-[11px] border border-slate-700/60">
+                    <td className="py-3 px-4 text-content-secondary">
+                      <span className="bg-surface-elevated/80 px-2 py-0.5 rounded text-[11px] border border-outline-subtle/60">
                         {q.topic}
                       </span>
                     </td>
@@ -138,7 +138,7 @@ export function QuestionsTable({ questions, scoring, onToggleComplete }: Questio
                         {q.difficulty}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-center font-mono text-[11px] text-cnOrange-400 font-bold">
+                    <td className="py-3 px-4 text-center font-mono text-[11px] text-brand-accent font-bold">
                       {pointsForDifficulty(q.difficulty, scoring)}
                     </td>
                     <td className="py-3 px-4 text-center">
@@ -146,7 +146,7 @@ export function QuestionsTable({ questions, scoring, onToggleComplete }: Questio
                         href={q.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-cnOrange-500/10 hover:bg-cnOrange-500/20 text-cnOrange-400 border border-cnOrange-500/30 text-[11px] font-bold transition"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-accent border border-brand-primary/30 text-[11px] font-bold transition"
                       >
                         <span>Solve</span>
                         <ExternalLink className="w-3 h-3" />
@@ -159,7 +159,7 @@ export function QuestionsTable({ questions, scoring, onToggleComplete }: Questio
           </tbody>
         </table>
       </div>
-      <p className="px-4 py-2.5 text-[10px] text-slate-500 border-t border-slate-800/60">
+      <p className="px-4 py-2.5 text-[10px] text-content-muted border-t border-outline-subtle/60">
         ✅ orange = solved (auto-verified from LeetCode or manually marked). Click any circle to
         toggle; manual ticks count toward progress and leaderboards.
       </p>

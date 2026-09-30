@@ -6,40 +6,40 @@ type Entry = GlobalLeaderboardEntry;
 const ranks = [
   {
     badge: "🥇 1st Rank (Champion)",
-    badgeClasses: "bg-amber-500 text-slate-950 text-xs shadow-lg shadow-amber-500/30",
+    badgeClasses: "bg-brand-accent text-content-inverse text-xs shadow-lg shadow-brand-accent/30",
     cardClasses:
-      "border-2 border-amber-500/60 order-1 md:order-2 bg-gradient-to-b from-amber-500/10 to-transparent p-6",
+      "border-2 border-brand-accent/60 order-1 md:order-2 bg-gradient-to-b from-brand-accent/10 to-transparent p-6",
     avatar: {
-      classes: "border-2 border-amber-400 shadow-lg shadow-amber-500/20",
+      classes: "border-2 border-brand-accent shadow-lg shadow-brand-accent/20",
       size: "w-20 h-20",
     },
     nameClasses: "font-extrabold text-lg",
-    rollClasses: "text-xs text-amber-200",
-    footerClasses: "bg-amber-500/20 border border-amber-500/30 p-2.5",
+    rollClasses: "text-xs text-brand-accent",
+    footerClasses: "bg-brand-accent/20 border border-brand-accent/30 p-2.5",
   },
   {
     badge: "🥈 2nd Rank",
-    badgeClasses: "bg-slate-300 text-slate-900 text-[10px]",
-    cardClasses: "border border-slate-300/30 order-2 md:order-1 p-5",
+    badgeClasses: "bg-rank-silver text-content-inverse text-[10px]",
+    cardClasses: "border border-rank-silver/30 order-2 md:order-1 p-5",
     avatar: {
-      classes: "border-2 border-slate-300",
+      classes: "border-2 border-rank-silver",
       size: "w-16 h-16",
     },
     nameClasses: "font-bold text-base",
-    rollClasses: "text-[11px] text-slate-400",
-    footerClasses: "bg-slate-900/80 p-2",
+    rollClasses: "text-[11px] text-content-muted",
+    footerClasses: "bg-surface-page/80 p-2",
   },
   {
     badge: "🥉 3rd Rank",
-    badgeClasses: "bg-amber-800 text-amber-100 text-[10px]",
-    cardClasses: "border border-amber-700/40 order-3 p-5",
+    badgeClasses: "bg-rank-bronze text-content-primary text-[10px]",
+    cardClasses: "border border-rank-bronze/40 order-3 p-5",
     avatar: {
-      classes: "border-2 border-amber-700",
+      classes: "border-2 border-rank-bronze",
       size: "w-16 h-16",
     },
     nameClasses: "font-bold text-base",
-    rollClasses: "text-[11px] text-slate-400",
-    footerClasses: "bg-slate-900/80 p-2",
+    rollClasses: "text-[11px] text-content-muted",
+    footerClasses: "bg-surface-page/80 p-2",
   },
 ] as const;
 
@@ -68,14 +68,14 @@ export function Podium({ top3 }: { top3: Entry[] }) {
                 sizeClasses={rank.avatar.size}
                 className={`mx-auto ${rank.avatar.classes}`}
               />
-              <h3 className={`${rank.nameClasses} text-white mt-2`}>{entry.name}</h3>
+              <h3 className={`${rank.nameClasses} text-content-primary mt-2`}>{entry.name}</h3>
               <p className={`${rank.rollClasses} font-mono`}>
                 {entry.rollNumber || "KIIT Student"}
               </p>
             </div>
             <div className={`mt-3 rounded-xl text-xs ${rank.footerClasses}`}>
-              <span className="font-black text-amber-300 text-sm">{entry.totalSolved} Solved</span>
-              <span className="text-amber-200 ml-2 font-mono font-bold">• {entry.score} pts</span>
+              <span className="font-black text-rank-gold text-sm">{entry.totalSolved} Solved</span>
+              <span className="text-brand-accent ml-2 font-mono font-bold">• {entry.score} pts</span>
             </div>
           </div>
         );

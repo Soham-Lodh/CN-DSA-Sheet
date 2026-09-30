@@ -7,17 +7,15 @@
 }
 
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #0f172a;
-  color: #f8fafc;
+  font-family: var(--font-space-grotesk), sans-serif;
+  @apply bg-surface-page text-content-primary;
   min-height: 100vh;
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.7);
+  @apply bg-surface-card/70 border border-outline-hairline;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-card-hover {
@@ -25,15 +23,12 @@ body {
 }
 
 .glass-card-hover:hover {
-  border-color: rgba(249, 115, 22, 0.4);
+  @apply border-brand-primary/40 shadow-lg shadow-brand-glow;
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.12);
 }
 
 .gradient-orange-text {
-  background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  @apply bg-gradient-to-br from-brand-primary to-brand-accent bg-clip-text text-transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
@@ -42,14 +37,23 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #0f172a;
+  @apply bg-surface-base;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #334155;
+  @apply bg-outline-subtle;
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #f97316;
+  @apply bg-brand-primary;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
 }

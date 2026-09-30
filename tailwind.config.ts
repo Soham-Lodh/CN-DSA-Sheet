@@ -1,35 +1,54 @@
 import type { Config } from "tailwindcss";
 
+/** Obsidian Circuit. */
+export const colorTokens = {
+  brand: {
+    primary: "#FF6A00",
+    hover: "#E55F00",
+    accent: "#FFA500",
+    glow: "rgba(255, 106, 0, 0.15)",
+  },
+  surface: {
+    base: "#0A0E16",
+    page: "#0F131C",
+    card: "#181C24",
+    elevated: "#202634",
+    input: "#262C3A",
+  },
+  content: {
+    primary: "#FFFFFF",
+    secondary: "#94A3B8",
+    muted: "#64748B",
+    inverse: "#0F131C",
+  },
+  outline: {
+    subtle: "#2B3345",
+    hairline: "rgba(255, 255, 255, 0.08)",
+  },
+  status: {
+    success: { DEFAULT: "#10B981", subtle: "rgba(16, 185, 129, 0.15)" },
+    warning: { DEFAULT: "#F59E0B", subtle: "rgba(245, 158, 11, 0.15)" },
+    danger: { DEFAULT: "#EF4444", subtle: "rgba(239, 68, 68, 0.15)" },
+    info: { DEFAULT: "#38BDF8", subtle: "rgba(56, 189, 248, 0.15)" },
+  },
+  rank: {
+    gold: "#FFA500",
+    silver: "#38BDF8",
+    bronze: "#D97706",
+  },
+} as const;
+
 const config: Config = {
   darkMode: "class",
   content: ["./app/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}", "./lib/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
-        cnOrange: {
-          50: "#fff7ed",
-          100: "#ffedd5",
-          200: "#fed7aa",
-          300: "#fdba74",
-          400: "#fb923c",
-          500: "#f97316",
-          600: "#ea580c",
-          700: "#c2410c",
-          800: "#9a3412",
-          900: "#7c2d12",
-        },
-        slateDark: {
-          700: "#334155",
-          800: "#1e293b",
-          850: "#172033",
-          900: "#0f172a",
-          950: "#080d1a",
-        },
-        primary: "#f97316",
+        ...colorTokens,
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "Fira Code", "monospace"],
+        sans: ["var(--font-space-grotesk)", "sans-serif"],
+        mono: ["var(--font-mono)", "Fira Code", "monospace"],
       },
     },
   },

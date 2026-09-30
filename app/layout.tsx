@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { getCurrentProfile } from "@/lib/auth";
 import { siteConfig } from "@/lib/site";
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-space-grotesk",
   display: "swap",
 });
 
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f172a",
+  themeColor: "#0F131C",
   colorScheme: "dark",
 };
 
@@ -70,7 +70,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${inter.variable} ${jetbrainsMono.variable} min-h-screen flex flex-col bg-slateDark-900 text-slate-100 antialiased custom-scrollbar`}
+        className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} min-h-screen flex flex-col bg-surface-page text-content-primary antialiased custom-scrollbar`}
       >
         <Navbar user={profile} />
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6">

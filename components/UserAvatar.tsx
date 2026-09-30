@@ -32,7 +32,7 @@ export function UserAvatar({
   return (
     <div
       title={name}
-      className={`${sizeClasses} rounded-full bg-gradient-to-tr from-cnOrange-500 to-amber-400 flex items-center justify-center ${className}`}
+      className={`${sizeClasses} rounded-full bg-gradient-to-tr from-brand-primary to-brand-accent flex items-center justify-center ${className}`}
     >
       <img
         src={FALLBACK_AVATAR}

@@ -29,7 +29,7 @@ interface CreateSheetModalProps {
   onClose: () => void;
 }
 
-const inputClasses = "w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-white";
+const inputClasses = "w-full bg-surface-page border border-outline-subtle rounded-lg p-2.5 text-content-primary";
 
 const pointFields: { field: keyof ScoringConfig; label: string }[] = [
   { field: "easyPoints", label: "Easy Points" },
@@ -57,20 +57,20 @@ export function CreateSheetModal({
   const isEdit = Boolean(initial);
 
   return (
-    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="glass-card p-6 rounded-2xl max-w-lg w-full border border-slate-700 space-y-4">
+    <div className="fixed inset-0 bg-surface-base/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="glass-card p-6 rounded-2xl max-w-lg w-full border border-outline-subtle space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-extrabold text-white text-base">
+          <h3 className="font-extrabold text-content-primary text-base">
             {isEdit ? "Edit DSA Sheet" : "Create Curated DSA Sheet"}
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
+          <button onClick={onClose} className="text-content-muted hover:text-content-primary">
             ✕
           </button>
         </div>
 
         <div className="space-y-3 text-xs">
           <div>
-            <label className="block text-slate-400 font-semibold mb-1">Sheet Name</label>
+            <label className="block text-content-muted font-semibold mb-1">Sheet Name</label>
             <input
               type="text"
               value={name}
@@ -81,7 +81,7 @@ export function CreateSheetModal({
           </div>
 
           <div>
-            <label className="block text-slate-400 font-semibold mb-1">URL Slug</label>
+            <label className="block text-content-muted font-semibold mb-1">URL Slug</label>
             <input
               type="text"
               value={slug}
@@ -91,14 +91,14 @@ export function CreateSheetModal({
               className={`${inputClasses} font-mono disabled:opacity-60`}
             />
             {isEdit && (
-              <p className="text-[10px] text-slate-500 mt-1">
+              <p className="text-[10px] text-content-muted mt-1">
                 Slug is fixed after creation (it is the sheet's public URL).
               </p>
             )}
           </div>
 
           <div>
-            <label className="block text-slate-400 font-semibold mb-1">Description</label>
+            <label className="block text-content-muted font-semibold mb-1">Description</label>
             <textarea
               value={description}
               onChange={(e) => onDescriptionChange(e.target.value)}
@@ -109,7 +109,7 @@ export function CreateSheetModal({
 
           {/* Per-sheet scoring configuration */}
           <div>
-            <label className="block text-slate-400 font-semibold mb-1">
+            <label className="block text-content-muted font-semibold mb-1">
               Scoring Points (per solved question)
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -118,7 +118,7 @@ export function CreateSheetModal({
                   field === "easyPoints" ? easyPoints : field === "mediumPoints" ? mediumPoints : hardPoints;
                 return (
                   <div key={field}>
-                    <label className="block text-[10px] text-slate-500 font-semibold mb-1 uppercase tracking-wide">
+                    <label className="block text-[10px] text-content-muted font-semibold mb-1 uppercase tracking-wide">
                       {label}
                     </label>
                     <input
@@ -134,22 +134,22 @@ export function CreateSheetModal({
                 );
               })}
             </div>
-            <p className="text-[10px] text-slate-500 mt-1.5">
-              Defaults follow the global scheme: Easy 1 · Medium 4 · Hard 8 pts.
+            <p className="text-[10px] text-content-muted mt-1.5">
+              Defaults follow the global scheme: Easy 3 · Medium 5 · Hard 8 pts.
             </p>
           </div>
 
           <div className="pt-2 flex items-center justify-end gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl"
+              className="px-4 py-2 bg-surface-elevated hover:bg-outline-subtle text-content-secondary font-bold rounded-xl"
             >
               Cancel
             </button>
             <button
               onClick={onCreate}
               disabled={saving || !name || (!isEdit && !slug)}
-              className="px-5 py-2 bg-cnOrange-600 hover:bg-cnOrange-700 text-white font-bold rounded-xl disabled:opacity-50"
+              className="px-5 py-2 bg-brand-primary hover:bg-brand-hover text-content-primary font-bold rounded-xl disabled:opacity-50"
             >
               {saving ? "Saving..." : isEdit ? "Save Changes" : "Create Sheet"}
             </button>

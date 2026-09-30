@@ -6,19 +6,19 @@ import type { ScoringConfig } from "@/lib/scoring/global";
 export function SheetStandings({
   sheetName,
   rows,
-  scoring = { easyPoints: 1, mediumPoints: 4, hardPoints: 8 },
+  scoring = { easyPoints: 3, mediumPoints: 5, hardPoints: 8 },
 }: {
   sheetName: string;
   rows: SheetLeaderboardEntry[];
   scoring?: ScoringConfig;
 }) {
   return (
-    <div className="glass-card rounded-2xl overflow-hidden border border-slate-800">
-      <div className="p-4 bg-slate-800/60 border-b border-slate-700 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+    <div className="glass-card rounded-2xl overflow-hidden border border-outline-subtle">
+      <div className="p-4 bg-surface-elevated/60 border-b border-outline-subtle flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-content-secondary">
           {sheetName} Leaderboard
         </h3>
-        <span className="text-[11px] text-slate-400">
+        <span className="text-[11px] text-content-muted">
           Easy {scoring.easyPoints} pt · Medium {scoring.mediumPoints} pts · Hard {scoring.hardPoints} pts —
           auto-verified from LeetCode + manual ticks
         </span>
@@ -26,7 +26,7 @@ export function SheetStandings({
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead>
-            <tr className="bg-slate-900/80 text-slate-400 uppercase font-semibold border-b border-slate-800">
+            <tr className="bg-surface-page/80 text-content-muted uppercase font-semibold border-b border-outline-subtle">
               <th className="py-3 px-4 w-16">Rank</th>
               <th className="py-3 px-4">Student</th>
               <th className="py-3 px-4 text-center">Sheet Solved</th>
@@ -36,10 +36,10 @@ export function SheetStandings({
               <th className="py-3 px-4 text-right">Score</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 font-medium">
+          <tbody className="divide-y divide-outline-subtle/60 font-medium">
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-slate-500">
+                <td colSpan={7} className="py-8 text-center text-content-muted">
                   No one has solved a question from this sheet yet — be the first!
                 </td>
               </tr>
@@ -47,13 +47,13 @@ export function SheetStandings({
               rows.map((row) => (
                 <tr
                   key={row.userId}
-                  className={`hover:bg-slate-800/60 transition ${
+                  className={`hover:bg-surface-elevated/60 transition ${
                     row.rank === 1
-                      ? "bg-amber-500/5"
+                      ? "bg-brand-accent/5"
                       : row.rank === 2
-                      ? "bg-slate-300/5"
+                      ? "bg-rank-silver/10"
                       : row.rank === 3
-                      ? "bg-amber-800/5"
+                      ? "bg-rank-bronze/10"
                       : ""
                   }`}
                 >
@@ -72,26 +72,26 @@ export function SheetStandings({
                         avatarUrl={row.avatarUrl}
                         name={row.name}
                         sizeClasses="w-7 h-7"
-                        className="border border-slate-600"
+                        className="border border-outline-subtle"
                       />
                       <div>
-                        <div className="font-bold text-white">{row.name}</div>
-                        <div className="text-[10px] text-slate-400 font-mono">
+                        <div className="font-bold text-content-primary">{row.name}</div>
+                        <div className="text-[10px] text-content-muted font-mono">
                           {row.rollNumber || "KIIT Student"}
                         </div>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-center font-bold text-white">
+                  <td className="py-3 px-4 text-center font-bold text-content-primary">
                     {row.totalSheetSolved} / {row.totalSheetQuestions}
-                    <span className="block text-[10px] text-slate-500 font-normal">
+                    <span className="block text-[10px] text-content-muted font-normal">
                       {row.completionPercent}%
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-center text-emerald-400">{row.easySolved}</td>
-                  <td className="py-3 px-4 text-center text-amber-400">{row.mediumSolved}</td>
-                  <td className="py-3 px-4 text-center text-rose-400">{row.hardSolved}</td>
-                  <td className="py-3 px-4 text-right font-mono font-bold text-cnOrange-400">
+                  <td className="py-3 px-4 text-center text-status-success">{row.easySolved}</td>
+                  <td className="py-3 px-4 text-center text-brand-accent">{row.mediumSolved}</td>
+                  <td className="py-3 px-4 text-center text-status-danger">{row.hardSolved}</td>
+                  <td className="py-3 px-4 text-right font-mono font-bold text-brand-accent">
                     {row.score} pts
                   </td>
                 </tr>
