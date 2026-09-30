@@ -6,3 +6,5 @@ build/
 *.log
 .freebuff/
 .next/
+*.tsbuildinfo
+out/
