@@ -225,12 +225,12 @@ export async function getAllSheetsWithUserProgress(userId?: string) {
 
   const sheetQuestions = await prisma.sheetQuestion.findMany({
     where: { sheet: { status: SheetStatus.PUBLISHED } },
-    select: { sheetId: true, id: true, question: { select: { externalKey: true } } },
+    select: { sheetId: true, id: true, questionId: true, question: { select: { externalKey: true } } },
   });
 
   const solvedBySheet = new Map<string, number>();
   for (const sq of sheetQuestions) {
-    const isSolved = manualMap.get(sq.id) ?? autoSolvedMap.has(sq.question.externalKey);
+    const isSolved = manualMap.get(sq.questionId) ?? autoSolvedMap.has(sq.question.externalKey);
     if (isSolved) {
       solvedBySheet.set(sq.sheetId, (solvedBySheet.get(sq.sheetId) ?? 0) + 1);
     }
