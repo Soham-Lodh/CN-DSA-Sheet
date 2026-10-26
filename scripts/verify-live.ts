@@ -80,7 +80,7 @@ async function main() {
   console.log(`heatmap: activeDays=${activity.activeDays} total=${activity.totalSubmissions} streak=${activity.currentStreak} longest=${activity.longestStreak}`);
   console.log(`  recent active days: ${sample.map((d) => `${d.date}=${d.count}`).join(", ")}`);
 
-  const { getSheetWithUserProgress, toggleQuestionProgress } = await import("../lib/services/sheets");
+  const { getSheetWithUserProgress, setQuestionProgress } = await import("../lib/services/sheets");
   const sheet = await prisma.sheet.findFirst({ orderBy: { createdAt: "asc" } });
   if (sheet) {
     const progress = await getSheetWithUserProgress(sheet.slug, profile.id);
@@ -90,14 +90,16 @@ async function main() {
     const q = progress?.questions[0];
     if (q) {
       console.log(`manual tick test on "${q.title}":`);
-      await toggleQuestionProgress(profile.id, q.id, true);
+      await setQuestionProgress(profile.id, { name: profile.name, rollNumber: profile.rollNumber, avatarUrl: profile.avatarUrl }, q.id, true, `verify-${Date.now()}`);
       const after = await getSheetWithUserProgress(sheet.slug, profile.id);
       console.log(`  after tick: solved=${after?.solvedQuestions} (score=${after?.score})`);
       const { getSheetLeaderboard } = await import("../lib/services/leaderboard");
       const rows = await getSheetLeaderboard(sheet.id);
       console.log(`  sheet leaderboard rows: ${rows.length} ${rows[0] ? `-> #${rows[0].rank} ${rows[0].name} solved=${rows[0].totalSheetSolved} score=${rows[0].score}` : ""}`);
       // Untick to restore state.
-      await toggleQuestionProgress(profile.id, q.id, false);
+      // Untick to restore state (persisted tri-state override). If the user
+      // has this auto-solved from LeetCode, the explicit false retains it as unsolved.
+      await setQuestionProgress(profile.id, { name: profile.name, rollNumber: profile.rollNumber, avatarUrl: profile.avatarUrl }, q.id, false, `verify-restore-${Date.now()}`);
       const restored = await getSheetWithUserProgress(sheet.slug, profile.id);
       console.log(`  after untick (restored): solved=${restored?.solvedQuestions}`);
     }

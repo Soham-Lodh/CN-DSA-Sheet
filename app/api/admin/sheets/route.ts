@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createSheetSchema } from "@/lib/validations";
+import { invalidateTags, sheetCatalogueInvalidationTags } from "@/lib/cache";
 
 export async function GET() {
   try {
@@ -44,6 +45,9 @@ export async function POST(request: NextRequest) {
         createdById: admin.id,
       },
     });
+
+    // Post-commit: refresh the public catalogue/sitemap views.
+    await invalidateTags(await sheetCatalogueInvalidationTags(sheet.slug));
 
     return NextResponse.json({ sheet }, { status: 201 });
   } catch (error: any) {

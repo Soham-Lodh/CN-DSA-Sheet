@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { updateQuestionSchema } from "@/lib/validations";
+import { invalidateTags, sheetCatalogueInvalidationTags } from "@/lib/cache";
 
 export async function PATCH(
   request: NextRequest,
@@ -15,7 +16,7 @@ export async function PATCH(
 
     const sheetQuestion = await prisma.sheetQuestion.findUnique({
       where: { id },
-      include: { question: true },
+      include: { question: true, sheet: { select: { slug: true } } },
     });
 
     if (!sheetQuestion) {
@@ -39,6 +40,9 @@ export async function PATCH(
       },
     });
 
+    // Question edits affect every sheet containing it.
+    await invalidateTags(await sheetCatalogueInvalidationTags(sheetQuestion.sheet.slug));
+
     return NextResponse.json({ sheetQuestion: { ...sheetQuestion, question } });
   } catch (error: any) {
     if (error.name === "ZodError") {
@@ -56,7 +60,10 @@ export async function DELETE(
     await requireAdmin();
     const { id } = await params;
 
-    await prisma.sheetQuestion.delete({ where: { id } });
+    const removed = await prisma.sheetQuestion.delete({ where: { id }, include: { sheet: { select: { slug: true } } } });
+
+    // Post-commit catalogue invalidation for the affected sheet.
+    await invalidateTags(await sheetCatalogueInvalidationTags(removed.sheet.slug));
 
     return NextResponse.json({ success: true });
   } catch (error) {

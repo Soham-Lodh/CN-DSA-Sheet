@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
 import { getGlobalLeaderboard } from "@/lib/services/leaderboard";
+import { withApiErrors } from "@/lib/api-errors";
 
-export async function GET() {
-  try {
-    const leaderboard = await getGlobalLeaderboard();
-    return NextResponse.json({ leaderboard });
-  } catch (error: any) {
-    console.error("Global leaderboard error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to fetch global leaderboard" },
-      { status: 500 }
-    );
-  }
-}
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export const GET = withApiErrors(async (): Promise<NextResponse> => {
+  const leaderboard = await getGlobalLeaderboard();
+  // Shared computed read: safe to cache briefly at the edge (no personal data
+  // beyond what the public page already shows).
+  return NextResponse.json(
+    { leaderboard },
+    { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } }
+  );
+});

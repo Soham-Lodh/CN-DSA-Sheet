@@ -48,7 +48,7 @@ export const createSheetSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Slug must be lowercase alphanumeric with hyphens"),
   description: z.string().max(1000).optional().nullable(),
   status: sheetStatusEnum.default(SheetStatus.DRAFT),
-  // Per-sheet scoring; defaults mirror the global 3/5/8 scheme.
+  // Per-sheet scoring; defaults mirror the global 1/4/8 scheme.
   easyPoints: pointsField("Easy").default(1),
   mediumPoints: pointsField("Medium").default(4),
   hardPoints: pointsField("Hard").default(8),
@@ -82,3 +82,30 @@ export const verifyPlatformAccountSchema = z.object({
 export const parseUrlSchema = z.object({
   url: z.string().url("Must be a valid URL"),
 });
+
+const IDEMPOTENCY_KEY_MAX = 100;
+const IDEMPOTENCY_KEY_RE = /^[a-zA-Z0-9_.:-]+$/;
+
+const idempotencyKeyField = z
+  .string()
+  .min(8, "Idempotency key is too short")
+  .max(IDEMPOTENCY_KEY_MAX, `Idempotency key cannot exceed ${IDEMPOTENCY_KEY_MAX} characters`)
+  .regex(IDEMPOTENCY_KEY_RE, "Idempotency key contains invalid characters");
+
+/**
+ * Set-state progress mutation. `solved` must be an actual boolean — never use
+ * Boolean(body.solved) coercion, which maps the string "false" to true.
+ */
+export const progressMutationSchema = z.object({
+  questionId: z.string().min(1, "questionId is required").max(64),
+  solved: z.boolean({
+    message: "solved must be a boolean (true or false)",
+  }),
+});
+
+export const progressMutationHeadersSchema = z.object({
+  "idempotency-key": idempotencyKeyField.optional(),
+});
+
+/** Upper bound on accepted JSON body size for progress mutations. */
+export const PROGRESS_BODY_MAX_BYTES = 4 * 1024;

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { verifyPlatformAccountSchema } from "@/lib/validations";
+import { invalidateTags, syncInvalidationTags } from "@/lib/cache";
 
 export async function GET() {
   try {
@@ -40,6 +41,9 @@ export async function PATCH(request: NextRequest) {
         verificationStatus: validated.status,
       },
     });
+
+    // Verification flag feeds leaderboard/profile views for that user.
+    await invalidateTags(await syncInvalidationTags(account.userId));
 
     return NextResponse.json({ account });
   } catch (error: any) {

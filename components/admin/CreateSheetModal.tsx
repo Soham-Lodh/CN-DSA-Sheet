@@ -92,7 +92,7 @@ export function CreateSheetModal({
             />
             {isEdit && (
               <p className="text-[10px] text-content-muted mt-1">
-                Slug is fixed after creation (it is the sheet's public URL).
+                Slug is fixed after creation (it is the sheet&apos;s public URL).
               </p>
             )}
           </div>

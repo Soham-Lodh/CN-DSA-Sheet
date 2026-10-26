@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
+import { Toaster } from "@/components/ui/Toast";
 import { getCurrentProfile } from "@/lib/auth";
 import { siteConfig } from "@/lib/site";
 
@@ -19,6 +20,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
+  // Root pages default to indexable; private routes opt out per-route.
+  alternates: { canonical: "/" },
   icons: {
     icon: "/cn.webp",
     shortcut: "/cn.webp",
@@ -76,6 +79,7 @@ export default async function RootLayout({
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6">
           {children}
         </main>
+        <Toaster />
       </body>
     </html>
   );

@@ -8,6 +8,7 @@ import { MetricCard } from "@/components/dashboard/MetricCard";
 import { SheetsCarousel } from "@/components/dashboard/SheetsCarousel";
 import { ActivityHeatmap } from "@/components/activity/ActivityHeatmap";
 import { sum } from "@/lib/utils";
+import { cachedRead, CACHE_TAGS, TTL } from "@/lib/cache";
 import { fetchLeetCodePotd } from "@/lib/platform/leetcode";
 import {
   CheckCircle,
@@ -42,7 +43,14 @@ export default async function DashboardPage() {
       prisma.platformSnapshot.findUnique({ where: { userId: profile.id } }),
       prisma.platformAccount.findUnique({ where: { userId: profile.id } }),
       getCombinedActivity(profile.id),
-      fetchLeetCodePotd(),
+      // POTD link is an external fetch: cached (30 min TTL) so page render
+      // never blocks on LeetCode; falls back on provider failure.
+      cachedRead(
+        ["potd-link"],
+        [CACHE_TAGS.potd],
+        Math.min(TTL.potd, 1800),
+        fetchLeetCodePotd
+      ),
     ]);
 
   const globalRank = rankOfUser(profile.id, leaderboard);
@@ -74,7 +82,7 @@ export default async function DashboardPage() {
           rel="noopener noreferrer"
           className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-primary to-brand-accent hover:from-brand-primary hover:to-rank-bronze text-content-primary font-bold text-xs sm:text-sm shadow-lg shadow-brand-primary/25 transition flex items-center gap-2"
         >
-          <span>View Today's POTD</span>
+          <span>View Today&apos;s POTD</span>
           <ArrowRight className="w-4 h-4" />
         </Link>
       </div>

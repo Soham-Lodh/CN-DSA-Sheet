@@ -3,6 +3,7 @@ import { requireAdmin, handleAuthError } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createQuestionSchema } from "@/lib/validations";
 import { parseProblemUrl } from "@/lib/platform/url-parser";
+import { invalidateTags, sheetCatalogueInvalidationTags } from "@/lib/cache";
 
 export async function GET(request: NextRequest) {
   try {
@@ -74,6 +75,9 @@ export async function POST(request: NextRequest) {
       update: { position },
       include: { question: true, sheet: true },
     });
+
+    // Post-commit: the sheet's question list/progress views must refresh.
+    await invalidateTags(await sheetCatalogueInvalidationTags(sheetQuestion.sheet.slug));
 
     return NextResponse.json({ sheetQuestion }, { status: 201 });
   } catch (error: any) {

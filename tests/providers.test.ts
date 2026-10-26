@@ -116,10 +116,10 @@ describe("LeetCode Provider Tests", () => {
   });
 });
 
-describe("Fixed Scoring (Easy 3 / Medium 5 / Hard 8)", () => {
+describe("Fixed Scoring (Easy 1 / Medium 4 / Hard 8)", () => {
   it("assigns the fixed point values", () => {
-    expect(SCORING_POINTS.EASY).toBe(3);
-    expect(SCORING_POINTS.MEDIUM).toBe(5);
+    expect(SCORING_POINTS.EASY).toBe(1);
+    expect(SCORING_POINTS.MEDIUM).toBe(4);
     expect(SCORING_POINTS.HARD).toBe(8);
     expect(pointsForDifficulty("UNKNOWN")).toBe(0);
     expect(pointsForDifficulty(null)).toBe(0);
@@ -137,8 +137,8 @@ describe("Fixed Scoring (Easy 3 / Medium 5 / Hard 8)", () => {
     expect(tally.easySolved).toBe(2);
     expect(tally.mediumSolved).toBe(1);
     expect(tally.hardSolved).toBe(1);
-    // 2*3 + 1*5 + 1*8 = 19
-    expect(tally.score).toBe(19);
+    // 2*1 + 1*4 + 1*8 = 14
+    expect(tally.score).toBe(14);
   });
 
   it("scores an empty list as zero", () => {

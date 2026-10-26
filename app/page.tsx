@@ -17,7 +17,7 @@ const features = [
     iconClasses: "bg-brand-accent/10 border border-brand-accent/30 text-brand-accent",
     title: "KIIT Chapter Leaderboard",
     description:
-      "Compete with batchmates with deterministic scoring: Easy 3 pts, Medium 5 pts, Hard 8 pts. Global standings plus a leaderboard for every sheet.",
+      "Compete with batchmates with deterministic scoring: Easy 1 pt, Medium 4 pts, Hard 8 pts. Global standings plus a leaderboard for every sheet.",
   },
   {
     icon: ShieldCheck,

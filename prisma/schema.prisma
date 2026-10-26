@@ -186,8 +186,37 @@ model SheetQuestion {
 
   @@unique([sheetId, questionId])
   @@index([sheetId, position])
+  @@index([questionId])
   @@map("sheet_questions")
 }
+
+/// Durable idempotency ledger for side-effecting mutations. One row per
+/// (user, route, Idempotency-Key); a unique constraint makes concurrent
+/// duplicate requests race here, not in the application data. completedAt is
+/// set when the mutation result is committed so a replay can return the
+/// recorded result without re-applying the change.
+model IdempotencyRecord {
+  id            String   @id @default(cuid())
+  userId        String
+  route         String
+  key           String
+  fingerprint   String
+  result        Json?
+  state         IdempotencyState @default(PENDING)
+  createdAt     DateTime @default(now())
+  completedAt   DateTime?
+
+  @@unique([userId, route, key])
+  @@index([createdAt])
+  @@map("idempotency_records")
+}
+
+enum IdempotencyState {
+  PENDING
+  COMPLETED
+}
+
+/// Managed by scripts/fix-auth-trigger.ts
 
 /// User's manual solve tick for a sheet question. Overrides the auto-verified
 /// status: markedSolved=true forces a tick, false forces an untick, no row =

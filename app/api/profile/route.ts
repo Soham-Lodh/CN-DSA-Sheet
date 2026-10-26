@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { updateProfileSchema } from "@/lib/validations";
 import { getUserGlobalRank } from "@/lib/services/leaderboard";
 import { getAllSheetsWithUserProgress } from "@/lib/services/sheets";
+import { invalidateTags, CACHE_TAGS } from "@/lib/cache";
 
 export async function GET() {
   try {
@@ -24,15 +25,10 @@ export async function GET() {
         getAllSheetsWithUserProgress(profile.id),
       ]);
 
-    return NextResponse.json({
-      profile,
-      globalRank,
-      totalSolved: snapshot?.totalSolved ?? 0,
-      platformAccount,
-      snapshot,
-      achievements,
-      sheetProgress,
-    });
+    return NextResponse.json(
+      { profile, globalRank, totalSolved: snapshot?.totalSolved ?? 0, platformAccount, snapshot, achievements, sheetProgress },
+      { headers: { "Cache-Control": "private, no-store" } }
+    );
   } catch (error) {
     return handleAuthError(error);
   }
@@ -57,7 +53,10 @@ export async function PATCH(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ profile: updated });
+    // Profile cache is personal to the acting user only.
+    await invalidateTags([CACHE_TAGS.userProfile(profile.id)]);
+
+    return NextResponse.json({ profile: updated }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error: any) {
     if (error.name === "ZodError") {
       return NextResponse.json({ error: error.errors }, { status: 400 });

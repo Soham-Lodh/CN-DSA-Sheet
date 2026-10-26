@@ -1,11 +1,14 @@
 import { prisma } from "@/lib/prisma";
-import { Difficulty, SyncStatus, VerificationStatus } from "@prisma/client";
+import { Difficulty, SyncStatus, VerificationStatus, SyncLog } from "@prisma/client";
 import { getProvider } from "@/lib/platform/registry";
+import { sortLockKeys, syncLockKey, withStrictLocking } from "@/lib/locking";
 
 const MIN_SYNC_INTERVAL_MINUTES = parseInt(
   process.env.PLATFORM_SYNC_MIN_INTERVAL_MINUTES || "10",
   10
 );
+/** RUNNING logs older than this are considered crashed and may be superseded. */
+const STALE_SYNC_RUNNING_MS = 30 * 60_000;
 
 /**
  * Batch size for solved-problem persistence. Upserts are flushed to the
@@ -22,11 +25,58 @@ export interface SyncResult {
   cached?: boolean;
 }
 
+/**
+ * Claim-based per-user sync serialization.
+ *
+ * A durable `RUNNING` SyncLog row created inside a short transaction that
+ * holds the canonical `sync:<userId>` advisory claim lock acts as the mutex:
+ * it survives across pooled connections, works on multiple server instances,
+ * and never spans the external LeetCode calls. A concurrent sync sees the
+ * RUNNING claim (fresh within STALE_SYNC_RUNNING_MS) and reports `cached`,
+ * instead of racing duplicate provider fetches. All writes remain idempotent
+ * upserts, so even unclaimable races cannot corrupt data.
+ */
+async function claimSync(userId: string, force: boolean): Promise<{ claimed: boolean; existingClaim?: SyncLog }> {
+  const now = new Date();
+  return withStrictLocking(
+    { lockKeys: [syncLockKey(userId)], idempotent: true },
+    async (tx) => {
+      // Rate-limit repeated syncs unless forced (re-check inside the claim).
+      const account = await tx.platformAccount.findUnique({ where: { userId } });
+      if (!account) return { claimed: false };
+      if (!force && account.lastSuccessfulSyncAt) {
+        const elapsedMinutes = (now.getTime() - account.lastSuccessfulSyncAt.getTime()) / (1000 * 60);
+        if (elapsedMinutes < MIN_SYNC_INTERVAL_MINUTES) return { claimed: false };
+      }
+      const running = await tx.syncLog.findFirst({
+        where: { userId, status: SyncStatus.RUNNING },
+        orderBy: { startedAt: "desc" },
+      });
+      if (
+        running &&
+        now.getTime() - running.startedAt.getTime() < STALE_SYNC_RUNNING_MS
+      ) {
+        return { claimed: false, existingClaim: running };
+      }
+      await closeStaleRunningLogs(tx, userId);
+      const syncLog = await tx.syncLog.create({
+        data: { userId, status: SyncStatus.RUNNING, startedAt: now },
+      });
+      return { claimed: true, existingClaim: syncLog };
+    },
+    prisma
+  );
+}
+
 /** Close stale RUNNING sync logs (crashed/restarted runs) so logs stay truthful. */
-async function closeStaleRunningLogs(userId: string) {
+async function closeStaleRunningLogs(tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0], userId: string) {
   try {
-    await prisma.syncLog.updateMany({
-      where: { userId, status: SyncStatus.RUNNING },
+    await tx.syncLog.updateMany({
+      where: {
+        userId,
+        status: SyncStatus.RUNNING,
+        startedAt: { lt: new Date(Date.now() - STALE_SYNC_RUNNING_MS) },
+      },
       data: {
         status: SyncStatus.FAILED,
         errorMessage: "Superseded by a newer sync (previous run did not finish).",
@@ -41,33 +91,27 @@ export async function syncUserPlatformAccount(
   userId: string,
   force = false
 ): Promise<SyncResult> {
-  const account = await prisma.platformAccount.findUnique({ where: { userId } });
-
-  if (!account) {
-    return {
-      status: SyncStatus.FAILED,
-      recordsProcessed: 0,
-      error: "LeetCode account not connected",
-    };
-  }
-
-  // Rate-limit repeated syncs unless forced.
-  const now = new Date();
-  if (!force && account.lastSuccessfulSyncAt) {
-    const elapsedMinutes =
-      (now.getTime() - account.lastSuccessfulSyncAt.getTime()) / (1000 * 60);
-    if (elapsedMinutes < MIN_SYNC_INTERVAL_MINUTES) {
-      return { status: SyncStatus.SUCCESS, recordsProcessed: 0, cached: true };
+  const claim = await claimSync(userId, force);
+  if (!claim.claimed || !claim.existingClaim) {
+    // Either already syncing recently, or no platform account connected.
+    const hasAccount = await prisma.platformAccount.findUnique({ where: { userId }, select: { id: true } });
+    if (!hasAccount) {
+      return {
+        status: SyncStatus.FAILED,
+        recordsProcessed: 0,
+        error: "LeetCode account not connected",
+      };
     }
+    return { status: SyncStatus.SUCCESS, recordsProcessed: 0, cached: true };
   }
-
-  await closeStaleRunningLogs(userId);
-
-  const syncLog = await prisma.syncLog.create({
-    data: { userId, status: SyncStatus.RUNNING, startedAt: now },
-  });
+  const syncLog = claim.existingClaim;
+  const now = new Date();
 
   try {
+    const account = await prisma.platformAccount.findUnique({ where: { userId } });
+    if (!account) {
+      return { status: SyncStatus.FAILED, recordsProcessed: 0, error: "LeetCode account not connected" };
+    }
     const provider = getProvider();
 
     // Fetch stats, recent solved problems and profile concurrently.
@@ -77,9 +121,10 @@ export async function syncUserPlatformAccount(
       provider.fetchProfile(account.username).catch(() => null),
     ]);
 
-    // Persistence is deliberately NOT one big interactive transaction: the
-    // every-write is idempotent, so a partial sync is safely resumable by the
-    // next sync instead of rolling back everything.
+    // Persistence is deliberately NOT one big interactive transaction: every
+    // write is idempotent, so a partial sync is safely resumable by the next
+    // sync instead of rolling back everything (and no DB locks are held
+    // across external HTTP calls).
     const snapshotData = {
       totalSolved: stats.totalSolved,
       easySolved: stats.easySolved,
@@ -147,17 +192,17 @@ export async function syncUserPlatformAccount(
     });
 
     return { status: SyncStatus.SUCCESS, recordsProcessed: solvedProblems.length };
-  } catch (err: any) {
-    const errorMessage = (err.message || "Unknown synchronization error").slice(0, 1000);
-    console.error(`Sync error for LeetCode (${account.username}):`, errorMessage);
+  } catch (err: unknown) {
+    const errorMessage = (err instanceof Error ? err.message : "Unknown synchronization error").slice(0, 1000);
+    console.error(`Sync error for user ${userId}:`, errorMessage);
 
     await prisma.syncLog.update({
       where: { id: syncLog.id },
       data: { status: SyncStatus.FAILED, completedAt: new Date(), errorMessage },
     }).catch(() => {});
 
-    await prisma.platformAccount.update({
-      where: { id: account.id },
+    await prisma.platformAccount.updateMany({
+      where: { userId },
       data: { lastSyncedAt: now, lastError: errorMessage },
     }).catch(() => {});
 
@@ -186,3 +231,5 @@ export async function syncAllAccountsCron(): Promise<{ total: number; succeeded:
 
   return { total: accounts.length, succeeded, failed };
 }
+
+export { sortLockKeys };

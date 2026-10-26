@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { pointsForDifficulty } from "@/lib/scoring/global";
+import {
+  cachedRead,
+  CACHE_TAGS,
+  TTL,
+} from "@/lib/cache";
 
 export interface GlobalLeaderboardEntry {
   rank: number;
@@ -31,7 +36,7 @@ export interface SheetLeaderboardEntry {
 }
 
 /** Deterministic ordering: score desc, solved desc, then roll number. */
-function sortEntries<T extends { score: number; totalSolved?: number; totalSheetSolved?: number; rollNumber: string | null }>(
+export function sortEntries<T extends { score: number; totalSolved?: number; totalSheetSolved?: number; rollNumber: string | null }>(
   entries: T[]
 ): (T & { rank: number })[] {
   entries.sort((a, b) => {
@@ -43,130 +48,223 @@ function sortEntries<T extends { score: number; totalSolved?: number; totalSheet
     const rollB = b.rollNumber || "zzzz";
     return rollA.localeCompare(rollB);
   });
+  // Stable deterministic tie-break even when roll numbers are equal.
   return entries.map((e, idx) => ({ ...e, rank: idx + 1 }));
 }
 
-/**
- * Global KIIT leaderboard, LeetCode-only. The E/M/H split and total come from
- * the synced PlatformSnapshot (LeetCode's own all-time aggregates), so they
- * match the profile page exactly. Score = easy*1 + medium*4 + hard*8.
- */
-export async function getGlobalLeaderboard(): Promise<GlobalLeaderboardEntry[]> {
-  const profiles = await prisma.profile.findMany({
+// ---------------------------------------------------------------------------
+// Global leaderboard: based on `PlatformSnapshot` aggregates from the
+// connected coding platform. Manual sheet ticks intentionally DO NOT change
+// these numbers; the global leaderboard only moves when a sync updates
+// snapshots (or the configured global scoring weights change).
+// ---------------------------------------------------------------------------
+
+async function loadGlobalLeaderboard(): Promise<GlobalLeaderboardEntry[]> {
+  // One bounded query: snapshot aggregates joined to profile metadata.
+  const snapshots = await prisma.platformSnapshot.findMany({
     select: {
-      id: true,
-      name: true,
-      rollNumber: true,
-      avatarUrl: true,
-      platformAccount: { select: { username: true } },
-      snapshots: {
-        select: { totalSolved: true, easySolved: true, mediumSolved: true, hardSolved: true },
+      userId: true,
+      totalSolved: true,
+      easySolved: true,
+      mediumSolved: true,
+      hardSolved: true,
+      user: {
+        select: {
+          name: true,
+          rollNumber: true,
+          avatarUrl: true,
+          platformAccount: { select: { username: true } },
+        },
       },
     },
   });
 
+  const entries = snapshots.map((s) => ({
+    userId: s.userId,
+    name: s.user.name,
+    rollNumber: s.user.rollNumber,
+    avatarUrl: s.user.avatarUrl,
+    leetcodeUsername: s.user.platformAccount?.username ?? null,
+    totalSolved: s.totalSolved,
+    easySolved: s.easySolved,
+    mediumSolved: s.mediumSolved,
+    hardSolved: s.hardSolved,
+    score: s.easySolved * pointsForDifficulty("EASY") + s.mediumSolved * pointsForDifficulty("MEDIUM") + s.hardSolved * pointsForDifficulty("HARD"),
+  }));
+
+  return sortEntries(entries);
+}
+
+export function getGlobalLeaderboard(): Promise<GlobalLeaderboardEntry[]> {
+  return cachedRead(
+    ["leaderboard", "global"],
+    [CACHE_TAGS.leaderboardGlobal],
+    TTL.globalLeaderboard,
+    loadGlobalLeaderboard
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Per-sheet leaderboard: rank by the sheet's question set, scored with the
+// sheet's own weights. Manual checkbox ticks (tri-state, including explicit
+// unsolved overrides) count here because per-sheet standings include manual
+// completion.
+// ---------------------------------------------------------------------------
+
+interface SheetQuestionBrief {
+  id: string;
+  externalKey: string;
+  difficulty: string;
+}
+
+async function loadSheetMetaForLeaderboard(sheetId: string) {
+  return prisma.sheet.findUnique({
+    where: { id: sheetId },
+    select: {
+      id: true,
+      slug: true,
+      easyPoints: true,
+      mediumPoints: true,
+      hardPoints: true,
+      sheetQuestions: {
+        orderBy: { position: "asc" as const },
+        select: {
+          question: { select: { id: true, externalKey: true, difficulty: true } },
+        },
+      },
+    },
+  });
+}
+
+async function loadSheetLeaderboard(sheetId: string): Promise<SheetLeaderboardEntry[]> {
+  const sheet = await loadSheetMetaForLeaderboard(sheetId);
+  if (!sheet || sheet.sheetQuestions.length === 0) return [];
+
+  const totalQuestions = sheet.sheetQuestions.length;
+  const questionIds = sheet.sheetQuestions.map((sq) => sq.question.id);
+  const externalKeys = [...new Set(sheet.sheetQuestions.map((sq) => sq.question.externalKey))];
+
+  // Bounded reads: only rows that can affect this sheet's questions, with
+  // only the columns the score needs. Manual rows include markedSolved=false
+  // entries because an explicit unsolved override hides an auto solve.
+  const [autoRows, manualRows] = await Promise.all([
+    prisma.solvedProblem.findMany({
+      where: { externalKey: { in: externalKeys } },
+      select: { userId: true, externalKey: true },
+    }),
+    prisma.manualProgress.findMany({
+      where: { questionId: { in: questionIds } },
+      select: { userId: true, questionId: true, markedSolved: true },
+    }),
+  ]);
+
+  // Only users with a signal on this sheet can appear (entries with 0 solves
+  // are filtered out below and never queried).
+  const involvedUserIds = new Set<string>([
+    ...autoRows.map((r) => r.userId),
+    ...manualRows.map((r) => r.userId),
+  ]);
+  if (involvedUserIds.size === 0) return [];
+
+  const profiles = await prisma.profile.findMany({
+    where: { id: { in: [...involvedUserIds] } },
+    select: { id: true, name: true, rollNumber: true, avatarUrl: true },
+  });
+
+  const autoByUser = new Map<string, Set<string>>();
+  for (const row of autoRows) {
+    let set = autoByUser.get(row.userId);
+    if (!set) {
+      set = new Set<string>();
+      autoByUser.set(row.userId, set);
+    }
+    set.add(row.externalKey);
+  }
+  const manualByUser = new Map<string, Map<string, boolean>>();
+  for (const row of manualRows) {
+    let map = manualByUser.get(row.userId);
+    if (!map) {
+      map = new Map<string, boolean>();
+      manualByUser.set(row.userId, map);
+    }
+    map.set(row.questionId, row.markedSolved);
+  }
+
+  const scoring = {
+    easyPoints: sheet.easyPoints,
+    mediumPoints: sheet.mediumPoints,
+    hardPoints: sheet.hardPoints,
+  };
+
   const entries = profiles.map((p) => {
-    const s = p.snapshots[0];
-    const easySolved = s?.easySolved ?? 0;
-    const mediumSolved = s?.mediumSolved ?? 0;
-    const hardSolved = s?.hardSolved ?? 0;
+    const autoKeys = autoByUser.get(p.id) ?? new Set<string>();
+    const manualMap = manualByUser.get(p.id) ?? new Map<string, boolean>();
+
+    let easySolved = 0;
+    let mediumSolved = 0;
+    let hardSolved = 0;
+    let totalSheetSolved = 0;
+    let score = 0;
+
+    for (const sq of sheet.sheetQuestions) {
+      const manual = manualMap.has(sq.question.id) ? manualMap.get(sq.question.id) : undefined;
+      // Tri-state: manual true/false is authoritative; no row falls back to
+      // the synced LeetCode match (deduplicated by canonical externalKey).
+      const isSolved = manual !== undefined ? manual : autoKeys.has(sq.question.externalKey);
+      if (!isSolved) continue;
+      totalSheetSolved += 1;
+      const pts = pointsForDifficulty(sq.question.difficulty, scoring);
+      score += pts;
+      if (sq.question.difficulty === "EASY") easySolved += 1;
+      else if (sq.question.difficulty === "MEDIUM") mediumSolved += 1;
+      else if (sq.question.difficulty === "HARD") hardSolved += 1;
+    }
+
     return {
       userId: p.id,
       name: p.name,
       rollNumber: p.rollNumber,
       avatarUrl: p.avatarUrl,
-      leetcodeUsername: p.platformAccount?.username ?? null,
-      totalSolved: s?.totalSolved ?? 0,
+      totalSheetSolved,
+      totalSheetQuestions: totalQuestions,
+      completionPercent: Math.round((totalSheetSolved / totalQuestions) * 1000) / 10,
       easySolved,
       mediumSolved,
       hardSolved,
-      score:
-        easySolved * pointsForDifficulty("EASY") +
-        mediumSolved * pointsForDifficulty("MEDIUM") +
-        hardSolved * pointsForDifficulty("HARD"),
+      score,
     };
-  });
+  }).filter((e) => e.totalSheetSolved > 0);
 
   return sortEntries(entries);
 }
 
-/**
- * Per-sheet leaderboard: rank by sheet questions solved, scored with the
- * sheet's own Easy/Medium/Hard point values (default 3/5/8).
- */
-export async function getSheetLeaderboard(sheetId: string): Promise<SheetLeaderboardEntry[]> {
-  const sheet = await prisma.sheet.findUnique({
-    where: { id: sheetId },
-    select: {
-      easyPoints: true,
-      mediumPoints: true,
-      hardPoints: true,
-      sheetQuestions: {
-        orderBy: { position: "asc" },
-        select: { question: { select: { id: true, externalKey: true, difficulty: true } } },
-      },
-    },
-  });
-  if (!sheet || sheet.sheetQuestions.length === 0) return [];
-
-  const totalQuestions = sheet.sheetQuestions.length;
-
-  const [profiles, manualProgress] = await Promise.all([
-    prisma.profile.findMany({
-      select: {
-        id: true,
-        name: true,
-        rollNumber: true,
-        avatarUrl: true,
-        solvedProblems: { select: { externalKey: true } },
-      },
-    }),
-    prisma.manualProgress.findMany({ where: { markedSolved: true } }),
-  ]);
-  const manualByUser = new Map<string, Set<string>>();
-  for (const mp of manualProgress) {
-    if (!manualByUser.has(mp.userId)) manualByUser.set(mp.userId, new Set());
-    manualByUser.get(mp.userId)!.add(mp.questionId);
-  }
-
-  const entries = profiles
-    .map((p) => {
-      // A sheet question counts as solved when the user's synced LeetCode
-      // records match its externalKey OR they manually ticked it.
-      const autoKeys = new Set(p.solvedProblems.map((sp) => sp.externalKey));
-      const solvedDifficulties: string[] = [];
-      for (const sq of sheet.sheetQuestions) {
-        if (autoKeys.has(sq.question.externalKey) || manualByUser.get(p.id)?.has(sq.question.id)) {
-          solvedDifficulties.push(sq.question.difficulty);
-        }
-      }
-      const totalSheetSolved = solvedDifficulties.length;
-      const easySolved = solvedDifficulties.filter((d) => d === "EASY").length;
-      const mediumSolved = solvedDifficulties.filter((d) => d === "MEDIUM").length;
-      const hardSolved = solvedDifficulties.filter((d) => d === "HARD").length;
-      return {
-        userId: p.id,
-        name: p.name,
-        rollNumber: p.rollNumber,
-        avatarUrl: p.avatarUrl,
-        totalSheetSolved,
-        totalSheetQuestions: totalQuestions,
-        completionPercent: Math.round((totalSheetSolved / totalQuestions) * 1000) / 10,
-        easySolved,
-        mediumSolved,
-        hardSolved,
-        score:
-          easySolved * sheet.easyPoints +
-          mediumSolved * sheet.mediumPoints +
-          hardSolved * sheet.hardPoints,
-      };
-    })
-    .filter((e) => e.totalSheetSolved > 0);
-
-  return sortEntries(entries);
+export function getSheetLeaderboard(sheetId: string): Promise<SheetLeaderboardEntry[]> {
+  /**
+   * Cache wrapper that attaches the sheet's slug tag (write paths invalidate
+   * per-sheet data by slug). One cheap indexed lookup, then the read.
+   */
+  return cachedRead(
+    ["sheet-leaderboard", sheetId],
+    [CACHE_TAGS.sheetsCatalogue],
+    TTL.sheetLeaderboard,
+    async () => {
+      const sheetMeta = await prisma.sheet.findUnique({
+        where: { id: sheetId },
+        select: { slug: true },
+      });
+      const slug = sheetMeta?.slug;
+      if (!slug) return [];
+      return cachedRead(
+        ["sheet-leaderboard-rows", sheetId],
+        [CACHE_TAGS.sheetLeaderboard(slug), CACHE_TAGS.sheet(slug)],
+        TTL.sheetLeaderboard,
+        () => loadSheetLeaderboard(sheetId)
+      );
+    }
+  );
 }
 
-/** Current user's global rank (reuses the full ranking when already loaded). */
+/** Current user's global rank (reuses the cached ranking when already loaded). */
 export function rankOfUser(
   userId: string | undefined,
   leaderboard: GlobalLeaderboardEntry[]
