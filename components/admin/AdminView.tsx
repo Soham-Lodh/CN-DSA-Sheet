@@ -15,6 +15,7 @@ import { AddQuestionModal, ParsedProblem } from "./AddQuestionModal";
 import { CreateSheetModal, SheetModalValues } from "./CreateSheetModal";
 import { DEFAULT_SHEET_SCORING } from "@/lib/scoring/global";
 import { EditQuestionModal } from "./EditQuestionModal";
+import { AchievementsTab } from "./AchievementsTab";
 
 const tabs: { id: AdminTab; label: string; icon: typeof Plus }[] = [
   { id: "overview", label: "Overview Metrics", icon: Database },
@@ -22,6 +23,7 @@ const tabs: { id: AdminTab; label: string; icon: typeof Plus }[] = [
   { id: "sheets", label: "DSA Sheets", icon: BookMarked },
   { id: "accounts", label: "LeetCode Accounts", icon: Users },
   { id: "admins", label: "Admins & Roles", icon: UsersRound },
+  { id: "achievements", label: "Achievements", icon: ShieldAlert },
 ];
 
 const slugify = (name: string) =>
@@ -326,6 +328,7 @@ export function AdminView({ data }: { data: AdminData }) {
     sheets: ` (${sheets.length})`,
     accounts: ` (${platformAccounts.length})`,
     admins: ` (${profiles.length})`,
+    achievements: "",
   };
 
   return (
@@ -434,6 +437,7 @@ export function AdminView({ data }: { data: AdminData }) {
           onDeleteUser={handleDeleteUser}
         />
       )}
+      {activeTab === "achievements" && <AchievementsTab />}
 
       {/* MODAL: ADD QUESTION */}
       {showAddQuestionModal && (

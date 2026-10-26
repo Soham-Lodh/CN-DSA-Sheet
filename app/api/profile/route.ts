@@ -17,16 +17,13 @@ export async function GET() {
       await Promise.all([
         prisma.platformAccount.findUnique({ where: { userId: profile.id } }),
         prisma.platformSnapshot.findUnique({ where: { userId: profile.id } }),
-        prisma.userAchievement.findMany({
-          where: { userId: profile.id },
-          include: { achievement: true },
-        }),
+        prisma.achievement.findMany({ include: { userAchievements: { where: { userId: profile.id } } }, orderBy: { threshold: "asc" } }),
         getUserGlobalRank(profile.id),
         getAllSheetsWithUserProgress(profile.id),
       ]);
 
     return NextResponse.json(
-      { profile, globalRank, totalSolved: snapshot?.totalSolved ?? 0, platformAccount, snapshot, achievements, sheetProgress },
+      { profile, globalRank, totalSolved: snapshot?.totalSolved ?? 0, platformAccount, snapshot, achievements: achievements.map((a) => ({ ...a.userAchievements[0], achievement: a })), sheetProgress },
       { headers: { "Cache-Control": "private, no-store" } }
     );
   } catch (error) {

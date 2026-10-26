@@ -5,6 +5,7 @@ import { getAllSheetsWithFullProgress } from "@/lib/services/sheets";
 import { getCombinedActivity } from "@/lib/services/activity";
 import { ProfileView } from "@/components/profile/ProfileView";
 import { redirect } from "next/navigation";
+import type { Achievement, UserAchievement } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -20,12 +21,13 @@ export default async function ProfilePage() {
     redirect(reason === "INVALID_DOMAIN" ? "/?error=invalid_domain" : "/");
   }
 
-  const [platformAccount, snapshot, leaderboard, sheetProgress, activity] = await Promise.all([
+  const [platformAccount, snapshot, leaderboard, sheetProgress, activity, achievements] = await Promise.all([
     prisma.platformAccount.findUnique({ where: { userId: profile.id } }),
     prisma.platformSnapshot.findUnique({ where: { userId: profile.id } }),
     getGlobalLeaderboard(),
     getAllSheetsWithFullProgress(profile.id),
     getCombinedActivity(profile.id),
+    prisma.achievement.findMany({ include: { userAchievements: { where: { userId: profile.id } } }, orderBy: { threshold: "asc" } }),
   ]);
 
   const globalRank = rankOfUser(profile.id, leaderboard);
@@ -48,6 +50,7 @@ export default async function ProfilePage() {
       snapshot={snapshot}
       sheetProgress={sheetProgress}
       activity={activity}
+      achievements={achievements.map((a) => ({ ...a.userAchievements[0], achievement: a })) as (UserAchievement & { achievement: Achievement })[]}
     />
   );
 }

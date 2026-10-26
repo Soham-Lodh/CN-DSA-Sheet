@@ -1,8 +1,10 @@
 import { SignInPanel } from "@/components/home/SignInPanel";
 import { Code2, ShieldCheck, Trophy } from "lucide-react";
+import { getCurrentProfile } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 // Fully static landing page: no DB, no auth cookie reads -> served as instant HTML.
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 const features = [
   {
@@ -28,7 +30,9 @@ const features = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  if (await getCurrentProfile()) redirect("/dashboard");
+
   return (
     <div className="space-y-12 py-6">
       {/* Hero Banner */}

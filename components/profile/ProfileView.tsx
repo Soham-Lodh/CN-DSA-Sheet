@@ -10,7 +10,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { PlatformAccount, PlatformSnapshot } from "@prisma/client";
+import type { Achievement, PlatformAccount, PlatformSnapshot, UserAchievement } from "@prisma/client";
 import type { SheetProgressSummary } from "@/lib/services/sheets";
 import { PlatformCard } from "./PlatformCard";
 import { AchievementsGrid } from "./AchievementsGrid";
@@ -37,6 +37,7 @@ interface ProfileViewProps {
   snapshot: PlatformSnapshot | null;
   sheetProgress: SheetProgressSummary[];
   activity: CombinedActivity;
+  achievements: (UserAchievement & { achievement: Achievement })[];
 }
 
 /** Client container for the profile page: LeetCode connect, sync, progress, heatmap. */
@@ -48,6 +49,7 @@ export function ProfileView({
   snapshot,
   sheetProgress,
   activity,
+  achievements,
 }: ProfileViewProps) {
   const router = useRouter();
   const [syncing, setSyncing] = useState(false);
@@ -196,7 +198,7 @@ export function ProfileView({
         <QuestionsDashboard sheets={sheetProgress} />
       </div>
 
-      <AchievementsGrid totalSolved={totalSolved} />
+      <AchievementsGrid totalSolved={totalSolved} achievements={achievements} />
     </div>
   );
 }

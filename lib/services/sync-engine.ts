@@ -1,7 +1,7 @@
-import { prisma } from "@/lib/prisma";
 import { Difficulty, SyncStatus, VerificationStatus, SyncLog } from "@prisma/client";
 import { getProvider } from "@/lib/platform/registry";
 import { sortLockKeys, syncLockKey, withStrictLocking } from "@/lib/locking";
+import { prisma } from "@/lib/prisma";
 
 const MIN_SYNC_INTERVAL_MINUTES = parseInt(
   process.env.PLATFORM_SYNC_MIN_INTERVAL_MINUTES || "10",
@@ -167,6 +167,14 @@ export async function syncUserPlatformAccount(
           })
         )
       );
+    }
+
+    const achievements = await prisma.achievement.findMany({ where: { threshold: { lte: stats.totalSolved } }, select: { id: true } });
+    if (achievements.length) {
+      await prisma.userAchievement.createMany({
+        data: achievements.map(({ id }) => ({ userId, achievementId: id })),
+        skipDuplicates: true,
+      });
     }
 
     await prisma.platformAccount.update({

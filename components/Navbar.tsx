@@ -24,6 +24,7 @@ export function Navbar({ user }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [signingIn, setSigningIn] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   // The navbar CTA starts Google OAuth directly instead of linking to "/".
   const handleSignIn = async () => {
@@ -44,10 +45,18 @@ export function Navbar({ user }: NavbarProps) {
   };
 
   const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      const { error } = await createClient().auth.signOut({ scope: "global" });
+      if (error) throw error;
+      // Replace prevents the authenticated page from remaining in browser history.
+      router.replace("/");
+      router.refresh();
+    } catch (error) {
+      console.error("Sign out failed:", error);
+      setSigningOut(false);
+    }
   };
 
   const navItems = [
@@ -90,9 +99,10 @@ export function Navbar({ user }: NavbarProps) {
           </Link>
 
           {/* User Profile Pill or Sign In Button */}
-          <Link href="/profile" className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
             {user ? (
               <div className="flex items-center gap-3 bg-surface-elevated/90 px-3 py-1.5 rounded-full border border-outline-subtle">
+                <Link href="/profile" className="flex items-center gap-3">
                 <div className="relative">
                   <UserAvatar
                     avatarUrl={user.avatarUrl}
@@ -116,12 +126,14 @@ export function Navbar({ user }: NavbarProps) {
                     {user.rollNumber || user.email}
                   </div>
                 </div>
+                </Link>
                 <button
                   onClick={handleLogout}
-                  className="text-content-muted hover:text-content-primary text-xs pl-2 border-l border-outline-subtle transition"
+                  disabled={signingOut}
+                  className="text-content-muted hover:text-content-primary text-xs pl-2 border-l border-outline-subtle transition disabled:opacity-50"
                   title="Sign out"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className={`w-4 h-4 ${signingOut ? "animate-pulse" : ""}`} />
                 </button>
               </div>
             ) : (
@@ -136,7 +148,7 @@ export function Navbar({ user }: NavbarProps) {
                 </span>
               </button>
             )}
-          </Link>
+          </div>
         </div>
       </header>
 

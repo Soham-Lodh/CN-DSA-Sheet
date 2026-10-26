@@ -42,4 +42,5 @@ export type AdminTab =
   | "questions"
   | "sheets"
   | "accounts"
-  | "admins";
+  | "admins"
+  | "achievements";

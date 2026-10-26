@@ -47,7 +47,7 @@ export function SignInPanel() {
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   // Render immediately on the server; only signed-in users see a swap to the spinner.
-  const [checkingAuth, setCheckingAuth] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
     const key = authErrorKey(readAuthError());
@@ -97,7 +97,7 @@ export function SignInPanel() {
         </h1>
 
         <p className="text-content-secondary text-sm sm:text-base leading-relaxed">
-          The official competitive programming and interview preparation tracker for KIITians. Connect your LeetCode account — sheet progress, streaks and rankings update automatically from your verified submissions (Easy 3 · Medium 5 · Hard 8 pts).
+          The official competitive programming and interview preparation tracker for KIITians. Connect your LeetCode account — sheet progress, streaks and rankings update automatically from your verified submissions (Easy 1 · Medium 4 · Hard 8 pts).
         </p>
 
         {authError && (
