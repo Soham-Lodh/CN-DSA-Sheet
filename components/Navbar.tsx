@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -10,7 +10,10 @@ import {
   ShieldAlert,
   LogOut,
   LogIn,
-  CheckCircle2,
+  ChevronDown,
+  Menu,
+  X,
+  UserRound,
 } from "lucide-react";
 import { createClient, startGoogleSignIn } from "@/lib/supabase/client";
 import { UserAvatar } from "./UserAvatar";
@@ -25,6 +28,19 @@ export function Navbar({ user }: NavbarProps) {
   const router = useRouter();
   const [signingIn, setSigningIn] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const closeMenus = (event: MouseEvent) => {
+      if (!profileMenuRef.current?.contains(event.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", closeMenus);
+    return () => document.removeEventListener("mousedown", closeMenus);
+  }, []);
 
   // The navbar CTA starts Google OAuth directly instead of linking to "/".
   const handleSignIn = async () => {
@@ -53,6 +69,7 @@ export function Navbar({ user }: NavbarProps) {
       // Replace prevents the authenticated page from remaining in browser history.
       router.replace("/");
       router.refresh();
+      setProfileOpen(false);
     } catch (error) {
       console.error("Sign out failed:", error);
       setSigningOut(false);
@@ -69,21 +86,18 @@ export function Navbar({ user }: NavbarProps) {
   ];
 
   return (
-    <>
-      {/* Top Header / Brand Bar */}
-      <header className="sticky top-0 z-50 glass-card border-b border-outline-subtle bg-surface-page/95 backdrop-blur-md px-4 lg:px-8 py-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <header className="sticky top-0 z-50 glass-card border-b border-outline-subtle bg-surface-page/95 backdrop-blur-md px-3 sm:px-4 lg:px-8 py-2">
+      <div className="max-w-7xl mx-auto flex items-center gap-2">
           {/* Brand Logo */}
-          <Link href="/dashboard" className="flex items-center gap-3 group">
-            {" "}
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-primary to-brand-accent flex items-center justify-center text-content-primary shadow-lg shadow-brand-primary/30 group-hover:scale-105 transition">
+          <Link href="/dashboard" className="flex items-center gap-2 sm:gap-3 group shrink-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-brand-primary to-brand-accent flex items-center justify-center text-content-primary shadow-lg shadow-brand-primary/30 group-hover:scale-105 transition">
               <img
                 src="/cn.webp"
                 alt="CN logo"
                 className="w-7 h-7 object-contain"
               />
             </div>
-            <div>
+            <div className="hidden sm:block">
               <div className="flex items-center gap-2">
                 <span className="font-black text-lg tracking-tight text-content-primary">
                   CODING NINJAS
@@ -98,12 +112,24 @@ export function Navbar({ user }: NavbarProps) {
             </div>
           </Link>
 
-          {/* User Profile Pill or Sign In Button */}
-          <div className="flex items-center gap-3">
+        <nav className="hidden md:flex items-center justify-center gap-1 flex-1 min-w-0">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = item.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(item.href);
+            return <Link key={item.href} href={item.href} className={`flex items-center gap-2 px-3 lg:px-4 py-2 rounded-lg font-semibold text-xs lg:text-sm transition ${isActive ? "text-content-primary bg-brand-primary shadow-md shadow-brand-primary/20" : "text-content-muted hover:text-content-primary hover:bg-surface-elevated"}`}>
+              <Icon className="w-4 h-4" /><span>{item.label}</span>
+            </Link>;
+          })}
+        </nav>
+
+        <div className="flex items-center gap-2 ml-auto">
+            <button aria-label={mobileNavOpen ? "Close navigation menu" : "Open navigation menu"} onClick={() => setMobileNavOpen((open) => !open)} className="md:hidden p-2 rounded-lg text-content-muted hover:text-content-primary hover:bg-surface-elevated transition">
+              {mobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
             {user ? (
-              <div className="flex items-center gap-3 bg-surface-elevated/90 px-3 py-1.5 rounded-full border border-outline-subtle">
-                <Link href="/profile" className="flex items-center gap-3">
-                <div className="relative">
+              <div className="relative" ref={profileMenuRef}>
+                <button aria-label="Open account menu" aria-expanded={profileOpen} onClick={() => setProfileOpen((open) => !open)} className="flex items-center gap-1.5 p-1.5 rounded-full hover:bg-surface-elevated transition">
+                  <div className="relative">
                   <UserAvatar
                     avatarUrl={user.avatarUrl}
                     name={user.name}
@@ -111,30 +137,13 @@ export function Navbar({ user }: NavbarProps) {
                     className="border border-brand-primary"
                   />
                   <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-status-success rounded-full border-2 border-surface-page"></span>
-                </div>
-                <div className="hidden md:block text-left pr-1">
-                  <div className="text-xs font-bold text-content-primary flex items-center gap-1">
-                    <span>{user.name}</span>
-                    <CheckCircle2 className="w-3 h-3 text-status-info" />
-                    {user.role === "ADMIN" && (
-                      <span className="text-[9px] bg-status-danger/20 text-status-danger border border-status-danger/30 px-1 py-0.2 rounded font-mono">
-                        ADMIN
-                      </span>
-                    )}
                   </div>
-                  <div className="text-[10px] text-content-muted font-mono">
-                    {user.rollNumber || user.email}
-                  </div>
-                </div>
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  disabled={signingOut}
-                  className="text-content-muted hover:text-content-primary text-xs pl-2 border-l border-outline-subtle transition disabled:opacity-50"
-                  title="Sign out"
-                >
-                  <LogOut className={`w-4 h-4 ${signingOut ? "animate-pulse" : ""}`} />
+                  <ChevronDown className="w-4 h-4 text-content-muted" />
                 </button>
+                {profileOpen && <div className="absolute right-0 top-full mt-2 w-44 rounded-xl border border-outline-subtle bg-surface-card p-1.5 shadow-xl">
+                  <Link href="/profile" onClick={() => setProfileOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-content-primary hover:bg-surface-elevated"><UserRound className="w-4 h-4" /> Profile</Link>
+                  <button onClick={handleLogout} disabled={signingOut} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-status-danger hover:bg-surface-elevated disabled:opacity-50"><LogOut className={`w-4 h-4 ${signingOut ? "animate-pulse" : ""}`} /> Sign out</button>
+                </div>}
               </div>
             ) : (
               <button
@@ -149,12 +158,8 @@ export function Navbar({ user }: NavbarProps) {
               </button>
             )}
           </div>
-        </div>
-      </header>
-
-      {/* Main Interactive Navigation Tab Bar */}
-      <nav className="bg-surface-card border-b border-outline-subtle px-4 lg:px-8 py-2.5 sticky top-[61px] z-40">
-        <div className="flex items-center justify-center space-x-1 sm:space-x-2 min-w-max">
+      </div>
+      {mobileNavOpen && <nav className="md:hidden max-w-7xl mx-auto mt-2 border-t border-outline-subtle pt-2 grid grid-cols-2 gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -163,10 +168,10 @@ export function Navbar({ user }: NavbarProps) {
                 : pathname.startsWith(item.href);
 
             return (
-              <Link
+              <Link onClick={() => setMobileNavOpen(false)}
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition ${
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-lg font-semibold text-xs transition ${
                   isActive
                     ? "text-content-primary bg-brand-primary shadow-md shadow-brand-primary/20"
                     : "text-content-muted hover:text-content-primary hover:bg-surface-elevated"
@@ -177,8 +182,7 @@ export function Navbar({ user }: NavbarProps) {
               </Link>
             );
           })}
-        </div>
-      </nav>
-    </>
+      </nav>}
+    </header>
   );
 }

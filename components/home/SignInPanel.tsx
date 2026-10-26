@@ -54,9 +54,18 @@ export function SignInPanel() {
     if (key) setAuthError(authErrorMessages[key]);
 
     const checkUser = async () => {
-      const { data } = await createClient().auth.getUser();
-      if (data.user) router.push("/dashboard");
-      else setCheckingAuth(false);
+      try {
+        const { data } = await createClient().auth.getUser();
+        if (data.user) {
+          router.push("/dashboard");
+        }
+      } catch (error) {
+        // An unavailable auth service must not leave the landing page stuck
+        // behind its loading indicator; visitors can still sign in manually.
+        console.error("Unable to check authentication state:", error);
+      } finally {
+        setCheckingAuth(false);
+      }
     };
     checkUser();
   }, [router]);

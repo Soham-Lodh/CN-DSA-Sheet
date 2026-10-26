@@ -66,7 +66,7 @@ export function AddQuestionModal({
             <Plus className="w-5 h-5 text-brand-primary" />
             <span>Add LeetCode Question to Sheet</span>
           </h3>
-          <button onClick={onClose} className="text-content-muted hover:text-content-primary">
+          <button type="button" onClick={onClose} className="text-content-muted hover:text-content-primary">
             ✕
           </button>
         </div>
@@ -89,6 +89,7 @@ export function AddQuestionModal({
                 className={`${inputClasses} flex-1`}
               />
               <button
+                type="button"
                 onClick={onParseUrl}
                 disabled={parsingUrl || !problemUrl.trim()}
                 className="px-4 py-2 bg-surface-elevated hover:bg-outline-subtle text-content-primary font-bold rounded-lg transition disabled:opacity-50"
@@ -161,14 +162,16 @@ export function AddQuestionModal({
 
           <div className="pt-2 flex items-center justify-end gap-2">
             <button
+              type="button"
               onClick={onClose}
               className="px-4 py-2 bg-surface-elevated hover:bg-outline-subtle text-content-secondary font-bold rounded-xl"
             >
               Cancel
             </button>
             <button
+              type="button"
               onClick={onSave}
-              disabled={savingQuestion || !parsedData}
+              disabled={savingQuestion}
               className="px-5 py-2 bg-brand-primary hover:bg-brand-hover text-content-primary font-bold rounded-xl disabled:opacity-50"
             >
               {savingQuestion ? "Saving..." : "Save Question"}

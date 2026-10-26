@@ -104,15 +104,28 @@ export function AdminView({ data }: { data: AdminData }) {
   };
 
   const handleSaveQuestion = async () => {
-    if (!parsedData || !selectedSheetId) return;
+    if (!selectedSheetId) {
+      setModalError("Create or select a sheet before adding a question.");
+      return;
+    }
+    if (!problemUrl.trim() && !parsedData) {
+      setModalError("Enter a LeetCode problem URL first.");
+      return;
+    }
     setSavingQuestion(true);
     setModalError(null);
     try {
+      let problem = parsedData;
+      if (!problem) {
+        problem = await postJson("/api/admin/questions/parse-url", { url: problemUrl.trim() });
+        setParsedData(problem);
+      }
+      if (!problem) throw new Error("Could not parse the problem URL.");
       await postJson("/api/admin/questions", {
-        url: parsedData.normalizedUrl,
-        title: customTitle || parsedData.title,
+        url: problem.normalizedUrl,
+        title: customTitle || problem.title,
         topic: customTopic || "General",
-        tags: parsedData.tags || [],
+        tags: problem.tags || [],
         difficulty: customDifficulty,
         sheetId: selectedSheetId,
       });
