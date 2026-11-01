@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { Profile, Role } from "@prisma/client";
 import { NextResponse } from "next/server";
@@ -59,6 +60,15 @@ export function extractRollNumber(email: string): string | null {
  * Retrieves the currently authenticated Supabase user.
  */
 export async function getCurrentUser() {
+  // Do not contact Supabase for anonymous requests. SSR sessions are stored
+  // in chunked `sb-*-auth-token` cookies; no such cookie means there is no
+  // authenticated user to resolve.
+  const cookieStore = await cookies();
+  const hasAuthCookie = cookieStore.getAll().some(
+    ({ name }) => name.startsWith("sb-") && name.includes("-auth-token")
+  );
+  if (!hasAuthCookie) return null;
+
   const supabase = await createClient();
   const {
     data: { user },

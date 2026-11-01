@@ -59,3 +59,23 @@ Statuses: `OPEN` | `FIXED (verified)` | `FIXED (local)` | `N/A (reason)`. Last u
 | `npx tsx scripts/verify-live.ts` (live Supabase DB) | PASS — forced sync OK; sheet read OK; heatmap OK; manual tick → `solved=1/10, score=1` with per-sheet leaderboard row (#1, score 5) appearing deterministically; untick restores `solved=0`. First run exposed defects A18/A19 which were fixed and re-verified. |
 
 Corrective history: `npm test` initially failed 4 assertions because two test files still encoded the old 3/5/8 scheme; they were corrected to the 1/4/8 runtime intent and extended (scoring/semantics/validation/lock-ordering files added).
+
+## 5. Navigation and loading UX audit — 2026-11-01
+
+| Issue | File / function | Cause | Severity | Change | Verification | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| N1 | `app/*/page.tsx` | No route-level `loading.tsx` boundaries; slow server work left the previous route visually unchanged during client navigation. | High | Added route-specific App Router loading boundaries for `/`, `/dashboard`, `/leaderboard`, `/profile`, `/sheets`, `/sheets/[slug]`, and `/admin`. | Production build; TypeScript; local route rendering. | FIXED (local) |
+| N2 | `components/home/SignInPanel.tsx` | A rejected Supabase `getUser()` promise left `checkingAuth` true indefinitely. | High | Authentication check now has `try/catch/finally`; the public page always exits its loading state. | TypeScript; existing tests. | FIXED (local) |
+| N3 | `components/ui/PageSkeletons.tsx` | Loading UI was generic or absent and did not preserve destination layout. | Medium | Added responsive dark/orange skeletons for dashboard, leaderboard, profile, sheets, sheet detail, and admin layouts with accessible status text. | TypeScript; production build. | FIXED (local) |
+| N4 | Protected server pages | Several pages still await all independent data before their first JSX return; route-level loading now gives immediate feedback, but section-level Suspense streaming is not yet implemented. | Medium | Documented as the next architectural phase; no business logic changed in this pass. | Source audit of `Promise.all`/sequential awaits. | OPEN (performance hypothesis confirmed) |
+| N5 | `middleware.ts` | Supabase `getUser()` runs for nearly all non-static requests and can add an auth round trip. | Medium | Preserved for security and session refresh; narrowing requires route-by-route auth tests and deployment measurements. | Existing auth design audit. | OPEN (requires deployment measurement) |
+| N6 | `middleware.ts`, `lib/auth.ts` | Anonymous requests with no SSR auth cookie still performed a Supabase auth request, delaying public pages and protected-route redirects. | High | Added a cookie-presence fast path. Verified session cookies still go through verified `getUser()` refresh and authorization. | Browser: protected route skeleton visible in ~490ms; anonymous redirect completed to `/` after hydration. | FIXED (local) |
+
+### Verification log
+
+| Command | Result |
+| --- | --- |
+| `npx tsc --noEmit` | PASS |
+| `npm test -- --run` | PASS — 40 tests / 4 files |
+| `npm run lint` | PASS — 0 warnings/errors |
+| `npm run build` | PASS — Next.js 15.5.26 compiled and generated 15 routes |

@@ -30,6 +30,15 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  // Anonymous requests have no session to refresh. Avoid an unnecessary
+  // Supabase network round trip so public pages and protected-route redirects
+  // can render immediately. Chunked SSR cookies use the same auth-token
+  // prefix, so this also works for large sessions.
+  const hasAuthCookie = request.cookies.getAll().some(
+    ({ name }) => name.startsWith("sb-") && name.includes("-auth-token")
+  );
+  if (!hasAuthCookie) return response;
+
   const supabase = createServerClient(url, anonKey, {
     cookies: {
       getAll() {
