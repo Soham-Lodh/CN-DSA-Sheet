@@ -8,3 +8,5 @@ build/
 .next/
 *.tsbuildinfo
 out/
+scripts/
+.txt
