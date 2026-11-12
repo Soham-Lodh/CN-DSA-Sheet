@@ -10,3 +10,4 @@ build/
 out/
 scripts/
 .txt
+e2e-tmp/
