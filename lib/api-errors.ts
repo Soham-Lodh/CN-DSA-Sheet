@@ -87,6 +87,24 @@ function mapError(error: unknown): ErrorEnvelope {
       internalDetail: `[api] ${error.code}: ${error.message}`,
     };
   }
+  // lib/auth's requireUser()/requireAdmin() throw sentinel errors; map them to
+  // real 401/403 envelopes so guarded routes never leak them as a 500.
+  if (error instanceof Error) {
+    if (error.message === "UNAUTHORIZED") {
+      return {
+        status: 401,
+        body: { code: "UNAUTHORIZED", message: "You need to sign in first.", retryable: false, requestId: randomUUID() },
+        internalDetail: "[api] UNAUTHORIZED",
+      };
+    }
+    if (error.message === "FORBIDDEN") {
+      return {
+        status: 403,
+        body: { code: "FORBIDDEN", message: "Admin access required.", retryable: false, requestId: randomUUID() },
+        internalDetail: "[api] FORBIDDEN",
+      };
+    }
+  }
   if (error instanceof LockTimeoutError) {
     return {
       status: 503,
@@ -162,8 +180,20 @@ export function withApiErrors<Args extends unknown[]>(
   };
 }
 
-/** Legacy simple handler kept for auth-only routes. */
+/**
+ * Legacy helper kept for the pre-existing routes: they still answer auth
+ * failures with the historic plain-string shape, so their UI keeps working.
+ * New routes use withApiErrors() and get the standard envelope (401/403).
+ */
 export function handleAuthError(error: unknown): NextResponse {
+  if (error instanceof Error) {
+    if (error.message === "UNAUTHORIZED") {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
+    }
+    if (error.message === "FORBIDDEN") {
+      return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
+    }
+  }
   const wrapper = withApiErrors(async () => { throw error; });
   return wrapper() as unknown as NextResponse;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookMarked, Database, Plus, ShieldAlert, Users, UsersRound } from "lucide-react";
+import { BookMarked, Database, FileSpreadsheet, Plus, ShieldAlert, Users, UsersRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Difficulty, Role, SheetStatus, VerificationStatus } from "@prisma/client";
 import type { AdminData, AdminTab } from "./types";
@@ -16,6 +16,7 @@ import { CreateSheetModal, SheetModalValues } from "./CreateSheetModal";
 import { DEFAULT_SHEET_SCORING } from "@/lib/scoring/global";
 import { EditQuestionModal } from "./EditQuestionModal";
 import { AchievementsTab } from "./AchievementsTab";
+import { ReportsTab } from "./ReportsTab";
 
 const tabs: { id: AdminTab; label: string; icon: typeof Plus }[] = [
   { id: "overview", label: "Overview Metrics", icon: Database },
@@ -24,6 +25,7 @@ const tabs: { id: AdminTab; label: string; icon: typeof Plus }[] = [
   { id: "accounts", label: "LeetCode Accounts", icon: Users },
   { id: "admins", label: "Admins & Roles", icon: UsersRound },
   { id: "achievements", label: "Achievements", icon: ShieldAlert },
+  { id: "reports", label: "Reports", icon: FileSpreadsheet },
 ];
 
 const slugify = (name: string) =>
@@ -342,6 +344,7 @@ export function AdminView({ data }: { data: AdminData }) {
     accounts: ` (${platformAccounts.length})`,
     admins: ` (${profiles.length})`,
     achievements: "",
+    reports: "",
   };
 
   return (
@@ -451,6 +454,7 @@ export function AdminView({ data }: { data: AdminData }) {
         />
       )}
       {activeTab === "achievements" && <AchievementsTab />}
+      {activeTab === "reports" && <ReportsTab sheets={sheets} />}
 
       {/* MODAL: ADD QUESTION */}
       {showAddQuestionModal && (

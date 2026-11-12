@@ -1,8 +1,11 @@
 "use client";
 
-import { ExternalLink, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ExternalLink, FileSpreadsheet, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import type { AdminSheet, AdminSheetQuestion } from "./types";
 import { difficultyClasses } from "@/lib/utils";
+import { ImportQuestionsModal } from "./ImportQuestionsModal";
 
 interface QuestionsTabProps {
   sheets: AdminSheet[];
@@ -28,6 +31,9 @@ export function QuestionsTab({
   onEditQuestion,
   onRemoveQuestion,
 }: QuestionsTabProps) {
+  const router = useRouter();
+  const [showImport, setShowImport] = useState(false);
+
   const filtered = questions.filter((q) => {
     if (filterSheetId !== "ALL" && q.sheetId !== filterSheetId) return false;
     if (!search) return true;
@@ -42,7 +48,7 @@ export function QuestionsTab({
   return (
     <div className="glass-card rounded-2xl p-5 space-y-4 border border-outline-subtle">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <select
             value={filterSheetId}
             onChange={(e) => onFilterSheetChange(e.target.value)}
@@ -56,7 +62,7 @@ export function QuestionsTab({
             ))}
           </select>
 
-          <div className="relative w-64">
+          <div className="relative w-full sm:w-64">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" />
             <input
               type="text"
@@ -68,13 +74,23 @@ export function QuestionsTab({
           </div>
         </div>
 
-        <button
-          onClick={onAddQuestion}
-          className="px-4 py-2 bg-brand-primary hover:bg-brand-hover text-content-primary rounded-xl text-xs font-bold transition flex items-center gap-1.5 self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Question</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={onAddQuestion}
+            className="px-4 py-2 bg-brand-primary hover:bg-brand-hover text-content-primary rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New Question</span>
+          </button>
+          <button
+            onClick={() => setShowImport(true)}
+            title="Add many questions to one sheet from an .xlsx or .csv file"
+            className="px-4 py-2 bg-surface-elevated hover:bg-outline-subtle text-content-primary rounded-xl text-xs font-bold border border-outline-subtle transition flex items-center gap-1.5"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-brand-primary" />
+            <span>Import Excel</span>
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -151,6 +167,15 @@ export function QuestionsTab({
           </tbody>
         </table>
       </div>
+
+      {showImport && (
+        <ImportQuestionsModal
+          sheets={sheets}
+          initialSheetId={filterSheetId !== "ALL" ? filterSheetId : sheets[0]?.id || ""}
+          onClose={() => setShowImport(false)}
+          onImported={() => router.refresh()}
+        />
+      )}
     </div>
   );
 }
