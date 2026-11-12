@@ -371,10 +371,6 @@ export function QuestionsTable({ questions, scoring, onSettled }: QuestionsTable
           </tbody>
         </table>
       </div>
-      <p className="px-4 py-2.5 text-[10px] text-content-muted border-t border-outline-subtle/60">
-        ✅ orange = solved (auto-verified from LeetCode or manually marked). Click any circle to
-        toggle; manual ticks count toward progress and leaderboards.
-      </p>
     </div>
   );
 }
